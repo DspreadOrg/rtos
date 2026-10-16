@@ -58,16 +58,58 @@ This project is a comprehensive POS terminal demo program that integrates core f
 
 ### **2. Build Process**
 
-In the `04.SDK_DEMO/app_csdk` directory, run the corresponding batch file based on the hardware model (A30R or D70R):
+#### **2.1 Hardware Model Mapping**
 
-- **Debug Build (TRACE logs enabled)**:
-  - A30R Model: `A30R_Lvgl_debug_build.bat`
-  - D70R Model: `D70R_Lvgl_debug_build.bat`
-- **Release Build (Logs disabled for performance)**:
-  - A30R Model: `A30R_Lvgl_release_build.bat`
-  - D70R Model: `D70R_Lvgl_release_build.bat`
+The SDK uses an internal hardware model code, while the same product is marketed under a different public name:
 
-The compiled firmware is located in the `out/xxx_debug/hex/` or `out/xxx_release/hex/` directory, mainly including `.pac` (Full Firmware) and `.img` (App-only Firmware).
+| Marketing Name | Hardware Model | Build Macros |
+|:-------------- |:-------------- |:------------ |
+| QPOS Plus      | A30R           | `-DHW_A30R`  |
+| D70            | D70R           | `-DHW_D70R`  |
+
+#### **2.2 Prerequisites**
+
+1. The cross-compilation toolchain is extracted to `C:\prebuilts` (contains `win32\bin`, `cmake`, `python3`, `gcc-arm-none-eabi`, and `ninja`). The build scripts add these to `PATH` automatically.
+2. The pre-compiled model libraries exist under `examples/Demo/Lib/`: `libSDK_<MODEL>.a` and `libSelfCheck_<MODEL>.a` (e.g. `libSDK_A30R.a`, `libSelfCheck_A30R.a`). The scripts abort with a clear message if they are missing.
+3. All build commands must be run from the `04.SDK_DEMO/app_csdk` directory in a Windows Command Prompt.
+
+#### **2.3 Build Scripts**
+
+Run the batch file that matches the hardware model and the desired build type:
+
+| Model          | Build Type                         | Script                         | Output Directory     |
+|:-------------- |:---------------------------------- |:------------------------------ |:-------------------- |
+| A30R (QPOS Plus)| Debug (TRACE logs enabled)        | `A30R_Lvgl_debug_build.bat`    | `out/A30R_debug/`    |
+| A30R (QPOS Plus)| Release (logs disabled, faster)   | `A30R_Lvgl_release_build.bat`  | `out/A30R_release/`  |
+| D70R (D70)     | Debug (TRACE logs enabled)         | `D70R_Lvgl_debug_build.bat`    | `out/D70R_debug/`    |
+| D70R (D70)     | Release (logs disabled, faster)    | `D70R_Lvgl_release_build.bat`  | `out/D70R_release/`  |
+
+For example, to build a release firmware for the D70 (D70R hardware):
+
+```bat
+cd 04.SDK_DEMO\app_csdk
+D70R_Lvgl_release_build.bat
+```
+
+#### **2.4 What a Build Script Does**
+
+Each script performs the same pipeline, parameterized by model and build type:
+
+1. **Check model libraries**: verifies `libSDK_<MODEL>.a` and `libSelfCheck_<MODEL>.a` exist.
+2. **Set compile macros** (`MY_PRJ`): the model macro `-DHW_<MODEL>` and `-DXML_MENU` are always defined; the release build additionally defines `-D__NOTRACE` to compile out TRACE logging.
+3. **Generate version header** (`script\svn_ver.bat`): writes `examples/Demo/Application/Include/version.h` from the SVN revision template.
+4. **Prepare environment** (`tools\core_launch.bat`): adds the `C:\prebuilts` toolchain, CMake, Python 3, and Ninja to `PATH`, then creates the `out/<MODEL>_<type>` directory.
+5. **Configure and compile**: runs `cmake ..\.. -G Ninja` to configure the Ninja project and `ninja` to build it.
+6. **Package and rename** (`script\rename.bat`): the build generates the application image and the full `.pac` package in `out/<MODEL>_<type>/hex/`; the script then copies the application `.img` to a version-stamped filename and removes the intermediate `.pac`.
+
+#### **2.5 Output Artifacts**
+
+The final deliverables are placed in `out/<MODEL>_<type>/hex/`:
+
+- **`<MODEL>_APP_<version>.<R|D><svn>.img`** — version-stamped application firmware image (the file to flash). The `R`/`D` flag indicates Release/Debug and the trailing number is the SVN revision.
+  - Example: `A30R_APP_V1.00.02.R19792.img`, `D70R_APP_V1.00.03.R19792.img`.
+- **`mainapp_flash.img`** — the raw application-only image produced during the build.
+- **`mainapp_flash.pac`** — the full firmware package (application + FDL) produced during the build; it is deleted by the packaging step, so keep a copy if a full-package file is needed.
 
 ### **3. Firmware Flashing**
 
