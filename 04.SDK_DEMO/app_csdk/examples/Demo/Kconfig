@@ -1,0 +1,15 @@
+# ty
+
+menu "SubApp configuration"
+
+
+
+config HW_TP20G
+    bool "hard ware tp20g"
+    default y
+    help the hard ware is tp20g
+    bool 
+
+
+
+endmenu

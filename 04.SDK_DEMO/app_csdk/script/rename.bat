@@ -1,0 +1,60 @@
+@echo off
+
+setlocal enabledelayedexpansion
+set SVN_VER=19792
+
+set OUT_PATH=%3_%4
+set VER_FILE=.\out\%OUT_PATH%\examples\Demo\CMakeFiles\mainapp_flash.dir\Application\Source\main.c.obj
+set VER_MACRO=INFO_DEV_SVER_MAIN
+set Para=%1
+
+
+rem 去掉最后一位
+set FilePre=%Para:~0,-1%
+
+rem 取最后一位
+set Last=%FilePre:~-1%
+set DorR=%Para:~-1%
+
+if "!Last!" == "_" (
+	set FilePre=%FilePre:~0,-1%
+)
+
+rem 在VER_FILE中取VER_MACRO表示的宏所定义的固件版本号
+rem 若取版本失败，则将版本号设置为UnkonwnVersion
+if not exist %VER_FILE%  (
+		@echo 无法取得版本号，请确认%VER_FILE%文件是否存在
+		goto:OVER
+)
+
+rem 版本号是根据宏变化的，从.o文件里面找到编译后的字符串，
+find "VER:V" %VER_FILE% >> .\script\tmp.txt
+for /f "TOKENS=1,2 EOL=/ DELIMS=:" %%i in (.\script\tmp.txt) do (
+    set DEFINE=%%i
+	set DEFINEVALUE=%%j
+    if "!DEFINE!"=="VER"  (
+		  set SVER=!DEFINEVALUE!
+		  del .\script\tmp.txt
+		  goto:OVER
+    )	
+)
+
+goto:OVER
+
+:GOTVER
+for /f  %%i in ('ECHO %DEFINEVALUE%') do (
+		rem 使用%%~i而不是%%i，目的在于脱去两头的引号
+
+		set SVER=%%~i.%DorR%%SVN_VER%
+)
+
+:OVER
+set NewName=%FilePre%_%SVER%.img
+cd .\out\%OUT_PATH%\hex
+copy %2.img %NewName%
+
+del %2.pac
+
+goto END
+
+:END

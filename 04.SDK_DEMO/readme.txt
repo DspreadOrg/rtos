@@ -1,0 +1,2 @@
+The kit includes a demo application source package. The demo implements typical functions such as the menu, transaction, and network configuration, and demonstrates how to use the related SDK interfaces.
+It is recommended that application development be based on the demo, and that the demo be used as the reference for the correct calling method of the interfaces.
