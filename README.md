@@ -14,13 +14,7 @@ This project is a comprehensive POS terminal demo program that integrates core f
 - **System Functions**: Integrated TMS remote upgrade, parameter management, log management, low power management, and driver abstraction layer (Battery, Key, Printer, GPS, etc.).
 - **Multi-language Support**: Built-in Chinese, English, Portuguese, and other language resources with dynamic switching mechanism.
 
-### **Tech Stack**
-
-- **Platform**: Unisoc 8910 (UIX8910)
-- **OS**: RTOS (with OSI abstraction layer)
-- **Build System**: CMake
-- **GUI Framework**: LVGL (Light and Versatile Graphics Library)
-- **Language**: C
+# 
 
 ---
 
