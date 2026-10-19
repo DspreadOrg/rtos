@@ -77,12 +77,12 @@ The SDK uses an internal hardware model code, while the same product is marketed
 
 Run the batch file that matches the hardware model and the desired build type:
 
-| Model          | Build Type                         | Script                         | Output Directory     |
-|:-------------- |:---------------------------------- |:------------------------------ |:-------------------- |
-| A30R (QPOS Plus)| Debug (TRACE logs enabled)        | `A30R_Lvgl_debug_build.bat`    | `out/A30R_debug/`    |
-| A30R (QPOS Plus)| Release (logs disabled, faster)   | `A30R_Lvgl_release_build.bat`  | `out/A30R_release/`  |
-| D70R (D70)     | Debug (TRACE logs enabled)         | `D70R_Lvgl_debug_build.bat`    | `out/D70R_debug/`    |
-| D70R (D70)     | Release (logs disabled, faster)    | `D70R_Lvgl_release_build.bat`  | `out/D70R_release/`  |
+| Model            | Build Type                      | Script                        | Output Directory    |
+|:---------------- |:------------------------------- |:----------------------------- |:------------------- |
+| A30R (QPOS Plus) | Debug (TRACE logs enabled)      | `A30R_Lvgl_debug_build.bat`   | `out/A30R_debug/`   |
+| A30R (QPOS Plus) | Release (logs disabled, faster) | `A30R_Lvgl_release_build.bat` | `out/A30R_release/` |
+| D70R (D70)       | Debug (TRACE logs enabled)      | `D70R_Lvgl_debug_build.bat`   | `out/D70R_debug/`   |
+| D70R (D70)       | Release (logs disabled, faster) | `D70R_Lvgl_release_build.bat` | `out/D70R_release/` |
 
 For example, to build a release firmware for the D70 (D70R hardware):
 
@@ -131,3 +131,4 @@ The final deliverables are placed in `out/<MODEL>_<type>/hex/`:
 - Environment Setup Manual:Locate in 01.DEB 
 - SDK User Manual: Locate in 03.SDK UM
 - Coolwatcher User Guide: Locate in 02.SDK Envrmt/
+- Firmware sign guide: Locate in 05.Tools/Firmware Signing Toolkit
