@@ -198,7 +198,7 @@ short MccDemo(ST_TRANSDATA* pstTransData);
 
 
 
-short CbAppDisplayMsg(ST_UIRD *pstUird, unsigned char ucOpsStatus);
+//short CbAppDisplayMsg(ST_UIRD *pstUird, unsigned char ucOpsStatus);
 
 
 #endif

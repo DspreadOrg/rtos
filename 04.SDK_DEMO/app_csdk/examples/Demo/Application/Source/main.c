@@ -74,8 +74,6 @@ int main(void)
     // Factory equipment inspection, please do not delete
     DevFactoryCheck();
 
-    CardDemoInit();
-
     LvHomeMenu(NULL);
 
     return 0;

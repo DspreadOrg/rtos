@@ -27,7 +27,6 @@
 #include "LibCharConvert.h"
 #include "LibcJSON.h"
 #include "Libmxml.h"
-#include "LibEmvKernel.h"
 #include "LibLvgl.h"
 #include "LibNetwork.h"
 #include "LibBattery.h"

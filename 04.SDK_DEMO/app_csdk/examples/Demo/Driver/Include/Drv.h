@@ -44,6 +44,14 @@
 #define HW_WIFI                     1   // 1 has WiFi , 0  no WiFi
 #define HW_QR_CAM                   1   // 1 has camera, 0 no camera
 
+#elif defined(HW_D30R)
+#define DEV_PN                      "D30R"
+
+// Device peripheral configuration
+#define HW_GPRS                     1   // 1 has gprs, 0 no gprs
+#define HW_TPH                      1   // 1 has printer, 0 no printer
+#define HW_WIFI                     1   // 1 has WiFi , 0  no WiFi
+#define HW_QR_CAM                   1   // 1 has camera, 0 no camera
 
 #elif
 #error "PN undefined"

@@ -104,7 +104,7 @@ void lv_port_fs_init(void)
 static void fs_init(void)
 {
     /*E.g. for FatFS initialize the SD card and FatFS itself*/
-	LV_LOG_INFO("tyfs_init");
+	LV_LOG_INFO("fs_init");
     /*You code here*/
 }
 
@@ -125,7 +125,7 @@ static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
 
     png_cur = png_list;
 
-    LV_LOG_INFO("tyfs_open %s", path);
+    LV_LOG_INFO("fs_open %s", path);
 
     if (png_list != NULL)
     {
@@ -145,11 +145,11 @@ static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
         png_cur->pNext = Lib_malloc(sizeof(png_file));
         if (NULL == png_cur->pNext)
         {
-            LV_LOG_ERROR("tyfs_open malloc error!");
+            LV_LOG_ERROR("fs_open malloc error!");
             return NULL;
         }
         malloc_len += sizeof(png_file);
-        LV_LOG_INFO("tyfs_open malloc_len: %d", malloc_len);
+        LV_LOG_INFO("fs_open malloc_len: %d", malloc_len);
         memset(png_cur->pNext, 0x00, sizeof(png_file));
 
         png_next = &png_cur->pNext;
@@ -159,11 +159,11 @@ static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
         png_list = (png_file *)Lib_malloc(sizeof(png_file));
         if (NULL == png_list)
         {
-        	LV_LOG_ERROR("tyfs_open malloc error!");
+        	LV_LOG_ERROR("fs_open malloc error!");
             return NULL;
         }
         malloc_len += sizeof(png_file);
-        LV_LOG_INFO("tyfs_open malloc_len: %d", malloc_len);
+        LV_LOG_INFO("fs_open malloc_len: %d", malloc_len);
         memset(png_list, 0x00, sizeof(png_file));
 
         png_next = &png_list;
@@ -174,7 +174,7 @@ static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
     file_size = Lib_FileSize((char *)path);
     if (file_size <= 0)
     {
-        LV_LOG_ERROR("tyfs_open LV_FS_RES_NOT_EX");
+        LV_LOG_ERROR("fs_open LV_FS_RES_NOT_EX");
         (*png_next)->size = 0;
         (*png_next)->data = NULL;
         (*png_next)->off = 0;
@@ -189,16 +189,16 @@ static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
         Lib_free(*png_next);
         *png_next = NULL;
 
-        LV_LOG_ERROR("tyfs_open malloc error!");
+        LV_LOG_ERROR("fs_open malloc error!");
         return NULL;
     }
     malloc_len += (*png_next)->size;
-    LV_LOG_INFO("tyfs_open malloc_len: %d", malloc_len);
+    LV_LOG_INFO("fs_open malloc_len: %d", malloc_len);
     fd = Lib_FileOpen((char *)path, LFS_O_RDONLY);
     Lib_FileRead(fd, (*png_next)->data, (*png_next)->size);
     Lib_FileClose(fd);
 
-    LV_LOG_INFO("tyfs_open name: %s, file_p: %p", (*png_next)->name, *png_next);
+    LV_LOG_INFO("fs_open name: %s, file_p: %p", (*png_next)->name, *png_next);
     (*png_next)->off = 0;
 
     return (void *)(*png_next);
@@ -213,10 +213,10 @@ static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
 static lv_fs_res_t fs_close(lv_fs_drv_t * drv, void * file_p)
 {
     png_file *png = (png_file *)file_p;
-    LV_LOG_INFO("tyfs_close, file_p: %p", file_p);
+    LV_LOG_INFO("fs_close, file_p: %p", file_p);
     if (png == NULL)
     {
-        LV_LOG_ERROR("tyfs_read file is NULL!");
+        LV_LOG_ERROR("fs_read file is NULL!");
         return LV_FS_RES_NOT_EX;
     }
 
@@ -236,13 +236,13 @@ static lv_fs_res_t fs_close(lv_fs_drv_t * drv, void * file_p)
  */
 static lv_fs_res_t fs_read(lv_fs_drv_t * drv, void * file_p, void * buf, uint32_t btr, uint32_t * br)
 {
-    LV_LOG_INFO("tyfs_read file_p: %p, btr: %d", file_p, btr);
+    LV_LOG_INFO("fs_read file_p: %p, btr: %d", file_p, btr);
 
     png_file *png = (png_file *)file_p;
 
     if (png == NULL)
     {
-        LV_LOG_ERROR("tyfs_read file is NULL!");
+        LV_LOG_ERROR("fs_read file is NULL!");
         return LV_FS_RES_NOT_EX;
     }
 
@@ -251,7 +251,7 @@ static lv_fs_res_t fs_read(lv_fs_drv_t * drv, void * file_p, void * buf, uint32_
     *br = btr;
     png->off += btr;
 
-    LV_LOG_INFO("tyfs_read actual read len: %d", *br);
+    LV_LOG_INFO("fs_read actual read len: %d", *br);
 
     return LV_FS_RES_OK;
 }
@@ -270,7 +270,7 @@ static lv_fs_res_t fs_write(lv_fs_drv_t * drv, void * file_p, const void * buf, 
     lv_fs_res_t res = LV_FS_RES_NOT_IMP;
 
     /*Add your code here*/
-    LV_LOG_INFO("tyfs_write!");
+    LV_LOG_INFO("fs_write!");
 
     return res;
 }
@@ -285,7 +285,7 @@ static lv_fs_res_t fs_write(lv_fs_drv_t * drv, void * file_p, const void * buf, 
  */
 static lv_fs_res_t fs_seek(lv_fs_drv_t * drv, void * file_p, uint32_t pos, lv_fs_whence_t whence)
 {
-    LV_LOG_INFO("tyfs_seek %d %d", whence, pos);
+    LV_LOG_INFO("fs_seek %d %d", whence, pos);
 
     png_file *png = (png_file *)file_p;
 
@@ -324,13 +324,13 @@ static lv_fs_res_t fs_tell(lv_fs_drv_t * drv, void * file_p, uint32_t * pos_p)
 
     if (png == NULL)
     {
-        LV_LOG_ERROR("tyfs_read file is NULL!");
+        LV_LOG_ERROR("fs_read file is NULL!");
         return LV_FS_RES_NOT_EX;
     }
 
     /* Add your code here*/
     *pos_p = png->off;
-    LV_LOG_INFO("tyfs_tell pos: %d", *pos_p);
+    LV_LOG_INFO("fs_tell pos: %d", *pos_p);
 
     return res;
 }

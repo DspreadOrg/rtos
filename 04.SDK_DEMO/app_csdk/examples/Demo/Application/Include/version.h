@@ -2,12 +2,12 @@
 #define __SVN_VERSION_TMPL
 
 
-#define SVN_VER       "R19792"
+#define SVN_VER       "R19887"
 
 
 #define SVN_MODIFIED  ""
-#define SVN_DATE      "2026/10/16 13:29:28"
-#define SVN_RANGE     "19792"
+#define SVN_DATE      "2026/10/22 13:21:33"
+#define SVN_RANGE     "19887"
 #define SVN_MIXED     "Not mixed"
 
 
@@ -23,6 +23,8 @@
 #define INFO_DEV_SUB_VER2	"02" 
 #elif defined(HW_A75R) 
 #define INFO_DEV_SUB_VER2	"04" 
+#elif defined(HW_D30R) 
+#define INFO_DEV_SUB_VER2	"05" 
 #endif
 
 // APP version (SVN version)

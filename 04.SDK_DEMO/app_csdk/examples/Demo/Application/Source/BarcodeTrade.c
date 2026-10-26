@@ -241,8 +241,29 @@ short BarCodeScan(int iTimeout)
 short OnlineBSQrTradeSetSendData(unsigned char *pucOut, unsigned short *pucOutLen)
 {
     extern unsigned char payBuffer[271];
+	unsigned char aucBuf[20];
+	unsigned char aucTimeBcd[7];
+	unsigned char aucTimeStr[12];
     *pucOutLen = sizeof(payBuffer);
     TRACE( "!!! tcp prepare buff size = %d\r\n", *pucOutLen);
+	// Transaction Date
+	Lib_GetDateTime(aucTimeBcd);
+	Lib_Bcd2Asc(aucTimeBcd, (char *)aucTimeStr, 6);
+	memset(aucBuf, 0, sizeof(aucBuf));
+	memcpy(aucBuf, "2020-01-01 00:00:00", strlen("2020-01-01 00:00:00"));
+	aucBuf[2] = aucTimeStr[0];
+	aucBuf[3] = aucTimeStr[1];
+	aucBuf[5] = aucTimeStr[2];
+	aucBuf[6] = aucTimeStr[3];
+	aucBuf[8] = aucTimeStr[4];
+	aucBuf[9] = aucTimeStr[5];
+	aucBuf[11] = aucTimeStr[6];
+	aucBuf[12] = aucTimeStr[7];
+	aucBuf[14] = aucTimeStr[8];
+	aucBuf[15] = aucTimeStr[9];
+	aucBuf[17] = aucTimeStr[10];
+	aucBuf[18] = aucTimeStr[11];
+	memcpy(g_trade_info.aucDateH, aucBuf, 20);
     memcpy(pucOut, payBuffer, *pucOutLen);
     return RET_OK;
 }
@@ -301,7 +322,7 @@ short UIOnlineBSQrcodeTrade(int iTimeout, unsigned long ulOpCode)
 
 #if 1
     //2.Scan QR code, set QR code type WeChat, Alipay
-    sRC =BarCodeScan(iTimeout);
+    sRC =BarCodeScan(300000);
     if (RET_OK != sRC)
     {
         return sRC;
@@ -343,17 +364,17 @@ short UIOnlineBSQrcodeTrade(int iTimeout, unsigned long ulOpCode)
     sprintf(aucBuf, "%s\n%s%s\n%s", TIP_QR_TRADE_SUCC, TIP_AMOUNT, aucTemp, TIP_PRINTING);
 #else
     sprintf(aucBuf, "%s\n%s%s", TIP_QR_TRADE_SUCC, TIP_AMOUNT, aucTemp);
+    result.timeout = 10000;
 #endif
     result.img = SUCCESS_IMG;
     result.title = TIP_SUCCESS;
     result.msg = aucBuf;
     result.fontColor = LV_COLOR_GREEN;
-    result.timeout = 10000;
-
-    LvUiShowResult(&result);
 
     // Add transaction records
     ApiAddRec(&g_trade_info);
+
+    LvUiShowResult(&result);
 
     //AudioPlay(AUDIO_STR_AND_AMOUNT, (unsigned char *)aucTemp);
     // Press the key to exit

@@ -12,7 +12,6 @@
 #include "ParamManage.h"
 #include "LanguageResource.h"
 #include "Language.h"
-#include "LibEmvKernel.h"
 #include "LibSelfCheck.h"
 #include "Communication.h"
 #include "LibTms.h"
@@ -122,6 +121,7 @@ int ResourceInit(void)
     // Set APP version
     Lib_SetInfo(E_APP_VERSION, APP_VERSION, strlen(APP_VERSION));
 
+#if 0
     // Set EMV library version
     usVerInfoLen = sizeof(acVersionBuffer);
     Lib_EmvGetLibVersion(acVersionBuffer, &usVerInfoLen);
@@ -129,6 +129,7 @@ int ResourceInit(void)
     {
         Lib_SetInfo(E_EMV_LIB_VERSION, acVersionBuffer, usVerInfoLen);
     }
+#endif
 
     // Set self-test library version
     usVerInfoLen = sizeof(acVersionBuffer);

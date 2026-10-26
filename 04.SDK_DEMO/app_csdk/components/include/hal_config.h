@@ -226,11 +226,9 @@
 /**
  * reserved NOR flash size for loadable app image
  */
-#ifdef HW_A30R
+
 #define CONFIG_APPIMG_FLASH_SIZE 0x168000
-#else
-#define CONFIG_APPIMG_FLASH_SIZE 0xe8000
-#endif
+
 
 /**
  * defined flash space

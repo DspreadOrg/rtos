@@ -214,7 +214,7 @@ int Lib_AlgRsaKeyPairVerify(unsigned char *pucRsaPk, unsigned char *pucRsaSk);
 int Lib_AlgBase64Encode(unsigned char *dst, unsigned int dlen, unsigned int *olen, const unsigned char *src, unsigned int slen);
 
 //-----------------------------------------------------------------------------
-// Name    : Lib_Base64Decode
+// Name    : Lib_AlgBase64Decode
 // Func    : Base64 Decode data 
 // Paras   : dst[in/out],   input data buffer and output base64 decoding data 
 //           dlen[in],      input length of data buffer

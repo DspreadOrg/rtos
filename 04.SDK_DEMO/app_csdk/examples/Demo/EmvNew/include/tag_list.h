@@ -1,0 +1,978 @@
+/*
+********************************************************************************
+*
+*   File Name:
+*       tag_list.h
+*   Author:
+*       SW R&D Department
+*   Version:
+*       V1.0
+*   Description:
+*
+*
+********************************************************************************
+*/
+
+#ifndef _TAG_LIST_H
+#define _TAG_LIST_H
+
+/*-----------------------------------------------------------------------------
+|   Includes
++----------------------------------------------------------------------------*/
+
+
+
+/*-----------------------------------------------------------------------------
+|   Macros
++----------------------------------------------------------------------------*/
+
+/*--------TAG List Defination------------------------------------------------*/
+/*TREE*/
+#define TAG_TREE_ROOT                               0x7F00
+#define TAG_TREE_ROOT_EMV                           0x7F01
+#define TAG_TREE_ROOT_PAYPASS                       0x7F02
+#define TAG_TREE_ROOT_PAYWAVE                       0x7F03
+#define TAG_TREE_ROOT_AMEX                          0x7F04
+#define TAG_TREE_ROOT_JSPEEDY                       0x7F05
+#define TAG_TREE_ROOT_DPAS                          0x7F06
+#define TAG_TREE_ROOT_QUICS                         0x7F07
+#define TAG_TREE_ROOT_QSPARC                        0x7F08
+#define TAG_TREE_ROOT_MIRPS                         0x7F09
+#define TAG_TREE_ROOT_INTERAC                       0x7F0A
+#define TAG_TREE_ROOT_CAPK                          0x7F0B
+#define TAG_TREE_CHILD_CAPK                         0x7F0C
+#define TAG_TREE_PARAMETER_FOR_START_TRANSACTION    0x7F0D
+#define TAG_TREE_ICS                                0x7F0E
+#define TAG_TREE_ROOT_STANDARD                      0x7F0F
+#define TAG_TREE_AID_LIST                           0x7F10
+#define TAG_TREE_AID_PARAMETER                      0x7F11
+#define TAG_TREE_EXCEPTION_FLIE_LIST                0x7F12
+#define TAG_TREE_PKI_REVO_LIST                      0x7F13
+#define TAG_TREE_FUNCTION                           0x7F14
+#define TAG_TREE_AID_LIST_TYPE                      0x7F15
+#define TAG_TREE_AID_LIST_NODE                      0x7F16
+#define TAG_TREE_AID_PARAMETER_TYPE                 0x7F17
+#define TAG_TREE_AID_PARAMETER_NODE                 0x7F18
+#define TAG_TREE_EXCEPTION_FLIE_NODE                0x7F19
+#define TAG_TREE_PKI_REVO_NODE                      0x7F1A
+#define TAG_TREE_AID_PARAMETER_VALUE                0x7F1B
+#define TAG_TREE_AID_SCRIPT_FILE                    0x7F1C
+#define TAG_TREE_PRIVATE_PARAMETER                  0x7F1D
+#define TAG_TREE_RF_PARAMETER_LIST                  0x7F1E
+#define TAG_TREE_RF_PARAMETER_NODE                  0x7F1F
+#define TAG_TREE_TRANSACTION_LOG                    0x7F20
+#define TAG_TREE_DYNAMIC_LIMITS                     0x7F21
+#define TAG_TREE_DYNAMIC_LIMITS_NODE                0x7F22
+#define TAG_TREE_DYNAMIC_LIMITS_VALUE               0x7F23
+#define TAG_TREE_LOG                                0x7F24
+#define TAG_TREE_RUNTIME_COUNTER_ROOT               0x7F25
+#define TAG_TREE_RUNTIME_COUNTER_NODE               0x7F26
+#define TAG_TREE_INFO_ROOT                          0x7F27
+#define TAG_TREE_RF_PARAMETER_AFTER_POLL_LIST       0x7F28
+#define TAG_TREE_RF_PARAMETER_AFTER_POLL_NODE       0x7F29
+#define TAG_TREE_ICS_CHILD_NODE                     0x7F2A
+#define TAG_TREE_ICS_CHILD_VALUE                    0x7F2B
+#define TAG_TREE_CANDIDATE_ROOT                     0x7F2C
+#define TAG_TREE_SERVICE_ROOT                       0x7F2D
+#define TAG_TREE_SERVICE_NODE                       0x7F2E
+#define TAG_TREE_ROOT_PURE                          0x7F2F
+#define TAG_TREE_VALUE_CANDIDATE_LIST               0x7F30
+#define TAG_TREE_TERMINAL_PARAMETER                 0x7F31
+#define TAG_TREE_ROOT_BANCOMAT                      0x7F32
+#define TAG_TREE_RF_PARAMETER_VISA_FUNCTION_LIST    0x7F33
+#define TAG_TREE_RF_PARAMETER_VISA_FUNCTION_NODE    0x7F34
+#define TAG_TREE_CANDIDATE_ROOT_CUSTOMER			0x7F35
+#define TAG_TREE_CANDIDATE_ROOT_CUSTOMER_TEMP		0x7F36
+
+#define TAG_TREE_DEKDET_MESSAGE                     0x7F8101
+#define TAG_TREE_DEKDET_HEADER                      0x7F8102
+#define TAG_TREE_DEKDET_GENERATED_BY                0x7F8103
+#define TAG_TREE_DEKDET_BODY                        0x7F8104
+#define TAG_TREE_DEKDET_EVT                         0x7F8105
+#define TAG_TREE_DEKDET_DEK                         0x7F8106
+#define TAG_TREE_DEKDET_DEKPROPERTIES               0x7F8107
+#define TAG_TREE_DEKDET_DET                         0x7F8108
+#define TAG_TREE_DEKDET_DETPROPERTIES               0x7F8109
+#define TAG_TREE_DEKDET_TRAILER                     0x7F810A
+
+/*CUSTOM*/
+#define TAG_NODE_EMV_TRANSACTION_RESULT             0x9F8102
+#define TAG_NODE_EMV_TRANS_REQ_ADVICE               0x9F8103
+#define TAG_NODE_EMV_MESSAGE_REVERSAL               0x9F8104
+#define TAG_NODE_EMV_TRANS_ADVICE_TYPE              0x9F8105
+#define TAG_BCTC_CUSTOM_DATA_CAPTRUE_MODE           0x9F8106
+#define TAG_NODE_CUSTOM_ENCRYPTION_MODE             0x9F8107
+#define TAG_NODE_CBK_BUF_SIZE_MAX                   0x9F8108
+
+#define TAG_NODE_AID_LIST_CANDIDATE_COUNTER			0x9F8112
+#define TAG_NODE_AID_SELECT_RESULT_INDEX			0x9F8113
+#define TAG_NODE_AID_LIST_DISPLAYNAME				0x9F8114
+#define TAG_NODE_AID_SELECT_TRYAGAIN				0x9F8115
+
+#define TAG_NODE_USER_INTERFACE_REQUEST_DATA_ON_RESTART 0x9F8117
+#define TAG_NODE_ACTIVE_CTL                         0x9F8118
+
+#define TAG_NODE_DEFAULT_DDOL                       0x9F8125
+#define TAG_NODE_DEFAULT_TDOL                       0x9F8126
+#define TAG_NODE_MAXIMUM_TARGET_PERCENTAGE_FOR_BIASED_RANDOM_SELECTION 0x9F8127
+#define TAG_NODE_TARGET_PERCENTAGE_FOR_BIASED_RANDOM_SELECTION 0x9F8128
+#define TAG_NODE_THRESHOLD_VALUE_FOR_BIASED_RANDOM_SELECTION 0x9F8129
+#define TAG_NODE_TAC_DEFAULT                        0x9F812A
+#define TAG_NODE_TAC_DENIAL                         0x9F812B
+#define TAG_NODE_TAC_ONLINE                         0x9F812C
+#define TAG_NODE_TAC_SWITCH                         0x9F812D
+
+#define TAG_NODE_PIN_ASC                            0x9F8155
+#define TAG_NODE_PIN_BLOCK                          0x9F8156
+#define TAG_NODE_PIN_BLOCK_PLAIN                    0x9F8157
+
+#define TAG_NODE_JCB_OPS_CVM_METHOD                 0x9F8201
+#define TAG_NODE_JCB_TORN_SUPPORT                   0x9F8202
+#define TAG_NODE_TRANSACTION_MODE                   0x9F8203//deprecate -> 0xDF43
+#define TAG_NODE_COMBINATION_OPTIONS                0x9F8204
+#define TAG_NODE_TERMINAL_INTERCHANGE_PROFILE_STATIC 0x9F8205
+#define TAG_NODE_IMPLEMENTATION_OPTIONS             0x9F8206
+#define TAG_NODE_ACQUIRER_OPTIONS                   0x9F8207
+#define TAG_NODE_CONTACTLESS_TRANSACTION_LIMIT      0x9F8208
+#define TAG_NODE_CONTACTLESS_CVM_REQUIRED_LIMIT     0x9F8209
+#define TAG_NODE_CONTACTLESS_FLOOR_LIMIT            0x9F820A
+#define TAG_NODE_QUICS_QPS_CVM_LIMIT				0x9F820C
+#define TAG_NODE_CUSTOM_CONTACT_CVM_LIMIT		    0x9F820D
+
+#define TAG_NODE_DRL_SWITCH                         0x9F8210
+#define TAG_NODE_PURE_READER_SWITCH					0x9F8211
+#define TAG_NODE_ON_DEVICE_CVM_CONTACTLESS_TRANSACTION_LIMIT 0x9F8212
+#define TAG_NODE_JCB_ECHO_COMMAND_RESPONSE          0x9F8213
+#define TAG_NODE_JCB_TORN_TRACK2_DATA               0x9F8214
+#define TAG_NODE_JCB_TORN_DATA_HASH_CODE            0x9F8215
+
+#define TAG_NODE_UNPREDICTABLE_NUMBER_LENGTH        0x9F8216
+#define TAG_NODE_UNPREDICTABLE_NUMBER_REQUIRED      0x9F8217
+#define TAG_NODE_DYNAMIC_READER_LIMITS              0x9F8218
+#define TAG_NODE_SAME_CARD_TOTAL_AMOUNT             0x9F8219
+#define TAG_NODE_PIN_INPUT_RETRY_FLAG               0x9F821A
+#define TAG_NODE_PIN_INPUT_REMAINING_COUNTER        0x9F821B
+#define TAG_NODE_EMV_CARDHOLDER_CONFIRMATION        0x9F821C
+#define TAG_NODE_CAPK_INDEX_LIST                    0x9F821D
+
+#define TAG_NODE_AMOUNT_ZERO_CHECK_OPTIONS          0x9F8220
+#define TAG_NODE_STATUS_CHECK                       0x9F8221
+
+#define TAG_NODE_CONTACTLESS_TRANSACTION_LIMIT_CHECK 0x9F8223
+#define TAG_NODE_CONTACTLESS_FLOOR_LIMIT_CHECK      0x9F8224
+#define TAG_NODE_TERMINAL_FLOOR_LIMIT_CHECK         0x9F8225
+#define TAG_NODE_CONTACTLESS_CVM_REQUIRED_LIMIT_CHECK 0x9F8226
+
+#define TAG_NODE_PROCESSING_RESTRICTION             0x9F822B
+
+#define TAG_NODE_ISSUER_PUBLIC_KEY_MODULE           0x9F8232
+#define TAG_NODE_ICC_PUBLIC_KEY_MODULE              0x9F8233
+#define TAG_NODE_ICC_PIN_PUBLIC_KEY_MODULE          0x9F8234
+
+#define TAG_NODE_ONLINE_ODA_FAIL_GO_ONLINE          0x9F8237
+
+#define TAG_NODE_ISSUER_ISSUERREFERAL_YESORNO       0x9F8239
+#define TAG_NODE_CVM_ID_CARD_YESORNO                0x9F823A
+
+#define TAG_NODE_CDA_FAIL_DETECTED_PRIOR_TAA1       0x9F8240
+#define TAG_NODE_DELAY_AUTHORISATION                0x9F8241
+#define TAG_NODE_KEY_REVOCATION                     0x9F8242
+
+#define TAG_NODE_EXCEPTION_FILE                     0x9F8245
+
+#define TAG_NODE_ZERO_CHECK                         0x9F8248
+#define TAG_NODE_ZERO_AMOUNT_ALLOWED_OFFLINE_CHECK  0x9F8249
+
+#define TAG_NODE_IS_FORCED_ONLINE                   0x9F8253
+
+#define TAG_NODE_UNABLE_TO_GO_ONLINE_SWITCH_PROCESS 0x9F8262
+
+#define TAG_NODE_ENTRYPOINT_RESTART_FLAG            0x9F8301
+#define TAG_NODE_ENTRYPOINT_EXTENDED_SELECTION_FLAG 0x9F8302
+#define TAG_NODE_ENTRYPOINT_EXTENDED_AID_SELECT_MODE 0x9F8303
+#define TAG_NODE_ENTRYPOINT_PPSE_CHECK_DF_NAME      0x9F8304
+#define TAG_NODE_ENTRYPOINT_GET_AID_PARAM           0x9F8305
+#define TAG_NODE_CUSTOM_AID_PRIORITY_FIXED          0x9F8306
+
+#define TAG_NODE_DATA_STORAGE_SUPPORTED             0x9F8401
+#define TAG_NODE_EXTENDED_LOGGING_SUPPORTED         0x9F8402
+#define TAG_NODE_TEARING_RECOVERY_SUPPORTED         0x9F8403
+#define TAG_NODE_DEFERRED_AUTHORIZATION_SUPPORTED   0x9F8404
+#define TAG_NODE_DATA_CONTAINER_READ_LIST_SUPPORTED 0x9F8405
+#define TAG_NODE_DATA_STORAGE_WRITE_RESULTS         0x9F8406
+#define TAG_NODE_WRITE_COMMIT_FLAG                  0x9F8407
+#define TAG_NODE_ANDROID_PRINTER_SWITCH				0x9F8408
+#define TAG_NODE_READ_CURRENT_RF_PARAMETER_SWITCH	0x9F8409
+#define TAG_NODE_TERMINAL_UNABLE_TO_GO_ONLINE		0x9F840A
+#define TAG_NODE_SUPPORT_EXPRESSPAY_MAGSTRIPE_MODE  0x9F840B
+#define TAG_NODE_CUSTOM_TRY_ANOTHER_INTERFACE_MODE  0x9F840C
+#define TAG_NODE_CTL_OUTCOME_PROCESS_DISABLE        0x9F840D
+#define TAG_NODE_CTL_ONLINE_REQUEST_NO_NEED_HANDLE  0x9F840E
+#define TAG_NODE_MAG_MODE_ONLY_FORCE_READ_RECORD    0x9F840F
+#define TAG_NODE_CTL_OUTPUT_EMV_MSG_SWITCH			0x9F8410
+
+#define TAG_NODE_CONTACTLESS_MAG_TRACK1_DCVV_DATA   0x9F8701
+#define TAG_NODE_AMEX_PSEUDO_TRACK1_DATA			0x9F8701
+#define TAG_NODE_CONTACTLESS_MAG_TRACK2_DCVV_DATA   0x9F8702
+#define TAG_NODE_AMEX_PSEUDO_TRACK2_DATA			0x9F8702
+#define TAG_NODE_ENTRYPOINT_BITMAP                  0x9F8703
+#define TAG_NODE_RESTART_FLAG                       0x9F8704
+#define TAG_NODE_VCPS_TERMINAL_ENTRY_CAPABILITY     0x9F8705
+#define TAG_NODE_VCPS_TRANSACTION_TYPE              0x9F8706
+#define TAG_NODE_DYNAMIC_LIMITS_INDEX               0x9F8707
+#define TAG_NODE_AUTOMATION_RESPONSE_RESULT         0x9F8708
+#define TAG_NODE_LOG_ENABLE                         0x9F8709
+#define TAG_NODE_LOG_TYPE                           0x9F870A
+#define TAG_NODE_LOG_VALUE                          0x9F870B
+#define TAG_NODE_RUNTIME_COUNTER_ENABLE             0x9F870C
+#define TAG_NODE_RUNTIME_COUNTER_LINE               0x9F870D
+#define TAG_NODE_RUNTIME_COUNTER_COUNT              0x9F870E
+#define TAG_NODE_INFO_NODE                          0x9F870F
+#define TAG_NODE_EMV_MENU_CMD                       0x9F8710
+#define TAG_NODE_EMV_DISPLAY_CMD                    0x9F8711
+#define TAG_NODE_EMV_DISPLAY_DATA					0x9F8712
+#define TAG_NODE_EMV_AUTO_TEST_TIME					0x9F8713
+#define TAG_NODE_EMV_VMTOOL_SEND_AMOUNT				0x9F8714
+#define TAG_NODE_EMV_VMTOOL_SEND_AMOUNTOTHER		0x9F8715
+#define TAG_NODE_EMV_VMTOOL_SEND_DATA_TIME			0x9F8716
+#define TAG_NODE_EMV_SELECT_CONFIG					0x9F8717
+#define TAG_NODE_EMV_ICS_SPT_ANOTHER_INTERFACE      0x9F8718
+#define TAG_NODE_EMV_VMTOOL_PIN_PROCESS_RESULT_TYPE 0x9F8719
+#define TAG_NODE_EMV_VMTOOL_SEND_PIN                0x9F871A
+#define TAG_NODE_EMV_SEND_STRING_TO_VMTOOL          0x9F871B
+#define TAG_NODE_EMV_VMTOOL_SEND_CONFIRM_RESULT     0x9F871C
+#define TAG_NODE_EMV_ACCOUNT_TYPE_SELECTION         0x9F871D
+#define TAG_NODE_EMV_FORCE_ONLINE                   0x9F871E
+#define TAG_NODE_EMV_FORCE_APPROVED                 0x9F871F
+#define TAG_NODE_EMV_PRINTER                        0x9F8720
+#define TAG_NODE_EMV_AUTO_TEST                      0x9F8721
+#define TAG_NODE_EMV_AUTO_TEST_TIMEOUT              0x9F8722
+#define TAG_NODE_EMV_CUSTOM_LANGUAGE                0x9F8723
+#define TAG_NODE_EMV_ADD_AID_ENTRY                  0x9F8724
+#define TAG_NODE_EMV_TERMINAL_SUPPORT_PSE           0x9F8725
+#define TAG_NODE_EMV_ICS_NAME                       0x9F8726
+#define TAG_NODE_EMV_C2_AC_TYPE                     0x9F8727
+#define TAG_NODE_EMV_C2_ODA_STATUS                  0x9F8728
+#define TAG_NODE_EMV_C2_NEXT_CMD                    0x9F8729
+#define TAG_NODE_EMV_C2_ACTIVE_TAG                  0x9F872A
+#define TAG_NODE_ENTRY_POINT_START_STATE            0x9F872B
+#define TAG_NODE_SIGNATURE_REQUESTED                0x9F872C
+#define TAG_NODE_EMV_FORCE_APPROVED_SELECTION       0x9F872D
+#define TAG_NODE_EMV_TSC                            0x9F872E
+#define TAG_NODE_EMV_TSC_MAX                        0x9F872F
+#define TAG_NODE_EMV_RECORD_DECLINED                0x9F8730
+#define TAG_NODE_PAYPASS_TEI_STATUS                 0x9F8731
+#define TAG_NODE_PAYWAVE_AUTO_FUNCTIONAL_STATUS     0x9F8732
+#define TAG_NODE_BANCOMAT_DERIVATION_KEY_INDEX      0x9F8733
+#define TAG_NODE_BANCOMAT_CRYPTO_VERSION_NUMBER     0x9F8734
+#define TAG_NODE_BANCOMAT_CCVR                      0x9F8735
+#define TAG_NODE_BANCOMAT_APP_DAILY_CUMU_SPEND_VAL  0x9F8736
+#define TAG_NODE_BANCOMAT_APP_MONTH_CUMU_SPEND_VAL  0x9F8737
+#define TAG_NODE_BANCOMAT_CARD_DAILY_CUMU_SPEND_VAL 0x9F8738
+#define TAG_NODE_BANCOMAT_CARD_MONTH_CUMU_SPEND_VAL 0x9F8739
+#define TAG_NODE_CUSTOM_CDA_SKIP_DATE_CHECK_FLAG    0x9F873A
+#define TAG_NODE_CUSTOM_CFG_PIN_BYPASS_NOT_SUPPORT	0x9F873B
+#define TAG_NODE_PAYWAVE_AUTO_ONLINE_PIN_SWITCH     0x9F873C
+#define TAG_NODE_CUSTOM_AAC_DO_NOT_SDAD			    0x9F873D
+#define TAG_NODE_CUSTOM_BELOW_CVM_LIMIT_SKIP_PIN    0x9F873E
+
+#define TAG_NODE_DEKDET_FILE_NAME                   0x9F8801
+#define TAG_NODE_DEKDET_FILE_DATE                   0x9F8802
+#define TAG_NODE_DEKDET_TEMPLATE_VERSION            0x9F8803
+#define TAG_NODE_DEKDET_COMPANY_NAME                0x9F8804
+#define TAG_NODE_DEKDET_PRODUCT_NAME                0x9F8805
+#define TAG_NODE_DEKDET_PRODUCT_VERSION             0x9F8806
+#define TAG_NODE_DEKDET_OPERATOR_NAME               0x9F8807
+#define TAG_NODE_DEKDET_EVT_TYPE                    0x9F8808
+#define TAG_NODE_DEKDET_DEKVALUE                    0x9F8809
+#define TAG_NODE_DEKDET_STATE                       0x9F880A
+#define TAG_NODE_DEKDET_DETVALUE                    0x9F880B
+#define TAG_NODE_DEKDET_SIGNATURE                   0x9F880C
+#define TAG_NODE_DEKDET_REQUEST_FLAG                0x9F880D
+
+#define TAG_NODE_READER_CARD_TYPE_BITMAP            0x9F8901
+#define TAG_NODE_READER_ATR                         0x9F8902
+#define TAG_NODE_READER_UID                         0x9F8903
+#define TAG_NODE_READER_ATQA                        0x9F8904
+#define TAG_NODE_READER_CARD_SAK                    0x9F8905
+#define TAG_NODE_READER_FUNC_RET                    0x9F8906
+#define TAG_NODE_READER_POLL_TYPE                   0x9F8907
+#define TAG_NODE_READER_TRANSMIT_DATA               0x9F8908
+#define TAG_NODE_READER_RANDOM_BYTES_NUM            0x9F8909
+#define TAG_NODE_READER_TIMEOUT_SECOND              0x9F890A
+
+#define TAG_NODE_ADDI_AP_SSID                       0x9F8A01
+#define TAG_NODE_ADDI_AP_PASSWORD                   0x9F8A02
+#define TAG_NODE_ADDI_SERVER_IP                     0x9F8A03
+#define TAG_NODE_ADDI_SERVER_PORT                   0x9F8A04
+
+#define TAG_NODE_SET_RF_PARAMETER                   0x9F918351
+#define TAG_NODE_GET_RF_PARAMETER                   0x9F918352
+#define TAG_NODE_PCB_ID                             0x9F918353
+#define TAG_NODE_CARD_UID                           0x9F918354
+
+#define TAG_NODE_RUPAY_SERVICE_TSQ                  0x9F9201
+
+#define TAG_NODE_TORN_TRANSACTION_DATE              0x9F9226
+#define TAG_NODE_TORN_TRANSACTION_TIME              0x9F9227
+#define TAG_NODE_RUPAY_TERMINAL_USE_ENVIRONMENT     0x9F9228
+#define TAG_NODE_ONLINE_CONNECT_FAIL                0x9F9229
+
+#define TAG_NODE_TAA_UNABLE_GO_ONLINE_RESULT        0x9F9245
+#define TAG_NODE_TAA_UNABLE_GO_ONLINE_ARC           0x9F9246
+
+#define TAG_NODE_PIN_MIN                            0x9F9301
+#define TAG_NODE_PIN_MAX                            0x9F9302
+
+#define TAG_NODE_NEXT_TO_DO                         0xDF00
+
+#define TAG_NODE_CAPK_MODULE                        0xDF02
+#define TAG_NODE_CAPK_CV                            0xDF03
+#define TAG_NODE_CAPK_EXPONENT                      0xDF04
+#define TAG_NODE_CAPK_EXPIRED_DATE                  0xDF05
+#define TAG_NODE_CAPK_HASH_ALG                      0xDF06
+#define TAG_NODE_CAPK_ALG                           0xDF07
+#define TAG_NODE_ASI                                0xDF08
+#define TAG_NODE_INTERNAL_KERNEL_ID                 0xDF09
+#define TAG_NODE_EXCEPTION_FLIE_PAN                 0xDF0A
+#define TAG_NODE_EXCEPTION_FLIE_SQN                 0xDF0B
+#define TAG_NODE_EXCEPTION_FLIE_ACTIVE              0xDF0C
+#define TAG_NODE_PKI_REVO_RID                       0xDF0D
+#define TAG_NODE_PKI_REVO_INDEX                     0xDF0E
+#define TAG_NODE_PKI_REVO_SERIAL_NUMBER             0xDF0F
+#define TAG_NODE_PKI_REVO_ACTIVE                    0xDF10
+#define TAG_NODE_AUTO_TEST                          0xDF11
+#define TAG_NODE_TERMINAL_TIME                      0xDF12
+#define TAG_NODE_POLL_TIMEOUT                       0xDF13
+
+#define TAG_NODE_RUPAY_SERVICE_ID                   0xDF16
+
+#define TAG_NODE_CARD_TYPE							0xDF30
+#define TAG_NODE_SCRIPT_RESULT                      0xDF31
+#define TAG_NODE_NSICCS_TEST						0xDF32
+#define TAG_NODE_PERFORMANCE_CARD_PRESENT           0xDF33
+#define TAG_NODE_ANDROID_IMAGE_POSITION_X			0xDF34
+#define TAG_NODE_ANDROID_IMAGE_POSITION_Y			0xDF35
+#define TAG_NODE_ANDROID_IMAGE_POSITION_FIXED		0xDF36
+#define TAG_NODE_BCTC_HOST_TOOL_SWITCH              0xDF37
+#define TAG_NODE_BUZZER_MUTE_SWITCH                 0xDF38
+
+#define TAG_NODE_ADDITIONAL_TERMINAL_CAPABILITIES_EXTENSION 0xDF3A
+
+#define TAG_NODE_RUPAY_SERVICE_TERMINAL_DATA        0xDF45
+
+#define TAG_NODE_RUPAY_SERVICE_PRMISS               0xDF47
+#define TAG_NODE_RUPAY_SERVICE_KEY                  0xDF48
+
+#define TAG_NODE_RUPAY_SERVICE_KEY_INDEX            0xDF4E
+
+#define TAG_NODE_IPK_REVOKE_RESULT                  0xDF8109
+
+#define TAG_NODE_USER_INTERFACE_REQUEST_DATA        0xDF8116
+#define TAG_NODE_BCTC_USER_INTERFACE_REQUEST_DATA_ON_RESTART 0xDF8117
+
+#define TAG_NODE_OUTCOME_PARAMETER_SET              0xDF8129
+
+#define TAG_NODE_CA_SERIAL_NUMBER                   0xDF8208
+
+#define TAG_NODE_DATA_CAPTURE_TYPE                  0xDF8401
+
+#define TAG_NODE_TRANSASCTION_MESSAGE_TYPE          0xDF8404
+#define TAG_NODE_RUPAY_SERVICE_PRMACQ               0xDF8405
+#define TAG_NODE_EMV_MESSAGE_TYPE                   0xDF8406
+
+#define TAG_NODE_VISA_CROSSTESING_CMD_TYPE          0xDF8501
+#define TAG_NODE_VISA_CROSSTESING_CMD_RESULT        0xDF8502
+#define TAG_NODE_VISA_CROSSTESING_TRANSACTION_RESULT_CODE 0xDF8503
+
+#define TAG_NODE_VISA_CROSSTESING_END_WITH_PPSE     0xDF8511
+#define TAG_NODE_VISA_CROSSTESING_END_WITH_AID      0xDF8512
+#define TAG_NODE_VISA_CROSSTESING_END_WITH_GPO      0xDF8513
+#define TAG_NODE_VISA_CROSSTESING_END_WITH_READ_RECORD 0xDF8514
+
+#define TAG_NODE_DATA_RECORD                        0xFF8105
+#define	TAG_NODE_DISCRETIONARY_DATA                 0xFF8106
+
+#define TAG_NODE_PROPRIETARY_TAG					0xFF08
+#define TAG_NODE_PROPRIETARY_TAG_TAG				0x9F8250
+#define TAG_NODE_PROPRIETARY_TAG_VALUE				0x9F8251
+#define TAG_NODE_PROPRIETARY_TAG_TEMPLATE			0x9F8252
+#define TAG_NODE_PROPRIETARY_TAG_MIN_LEN			0x9F8253
+#define TAG_NODE_PROPRIETARY_TAG_MAX_LEN			0x9F8254
+#define TAG_NODE_PROPRIETARY_TAG_UPDATE				0x9F8255
+#define TAG_NODE_PROPRIETARY_TAG_FORMAT				0x9F8256
+
+#define TAG_NODE_PURE_CONTACTLESS_APPLICATION_CAPABILITIES 0x9F9301
+#define TAG_NODE_PURE_CONTACTLESS_POS_IMPLEMENTATION_OPTIONS 0x9F9302
+#define TAG_NODE_PURE_POS_TIMEOUT_LONG_TAP			0x9F9307
+#define TAG_NODE_PURE_TRANSACTION_TYPE_VALUE_FOR_AAT 0x9F9309
+#define TAG_NODE_PURE_ADDITIONAL_TAG_OBJ_LIST_ATOL  0x9F9311
+#define TAG_NODE_PURE_MANDATORY_TAG_OBJ_LIST_MTOL   0x9F9312
+#define TAG_NODE_PURE_AUTH_TRANS_DATA_TAG_OBJ_LIST_ATDTOL 0x9F9313
+#define TAG_NODE_PURE_DEFAULT_DDOL					0x9F9314
+
+/*Kernel Internal Exchange TAG*/
+#define TAG_CONTAINER                               0x7F00
+#define TAG_DEK_DET_DATA                            0x7F10
+#define TAG_TXN_DATA                                0x7F11
+#define TAG_FCI_DATA                                0x7F12
+#define TAG_SYNC_DATA                               0x7F13
+#define TAG_ICS_DATA                                0x7F14
+#define TAG_TREE_ONLINE_TRANSACTION_DATA            0x7F15
+#define TAG_TREE_RECOVERY_CONTEXT                   0x7F16
+
+#define TAG_NODE_APDU_EXCHANGE                      0xDF01
+#define TAG_NODE_LCD_MESSAGE_ID                     0xDF02
+#define TAG_NODE_MESSAGE_DEBUG                      0xDF03
+#define TAG_NODE_MESSAGE_DEBUG_HEX                  0xDF04
+#define TAG_NODE_PAN_IN_EXCEPTION_FILE              0xDF05
+#define TAG_NODE_TIMIEOUT_VALUE                     0xDF06
+
+#define TAG_NODE_IPK_REVOKE_SERIAL_NUMBER           0xDF8108
+
+#define TAG_NODE_CA_PUBLIC_KEY_MODULE               0xDF8201
+#define TAG_NODE_CA_PUBLIC_KEY_EXPONENT             0xDF8202
+#define TAG_NODE_CA_PUBLIC_KEY_EXP_DATE             0xDF8203
+
+#define TAG_NODE_RUPAY_APP_BLOCK_PROCESS            0xDF8204
+
+#define TAG_NODE_PURE_ZERO_AMOUNT_ALLOWED_FLAG		0x9F8222
+#define TAG_NODE_PURE_EXCEPTION_FILE_CHECK			0x9F8227
+#define TAG_NODE_PURE_MAXIMUM_TARGET_PERCENTAGE_FOR_BIASED_RANDOM_SELECTION 0x9F8242
+#define TAG_NODE_PURE_TARGET_PERCENTAGE_FOR_BIASED_RANDOM_SELECTION 0x9F8243
+#define TAG_NODE_PURE_THRESHOLD_VALUE_FOR_BIASED_RANDOM_SELECTION 0x9F8244
+#define TAG_NODE_PURE_TAC_DEFAULT					0x9F8245
+#define TAG_NODE_PURE_TAC_DENIAL					0x9F8246
+#define TAG_NODE_PURE_TAC_ONLINE					0x9F8247
+
+#define TAG_NODE_EMV_USE_PSE                        0x9F8117
+#define TAG_NODE_EMV_RESELECT_PSE					0x9F8118
+#define TAG_NODE_EMV_FLOOR_LIMIT_CHECKING			0x9F8143
+#define TAG_NODE_EMV_VELOCITY_CHECKING				0x9F8145
+#define TAG_NODE_EMV_SUPPORT_FORCED_ONLINE			0x9F8147
+#define TAG_NODE_EMV_SUPPORT_ISSUERREFERAL			0x9F8235
+
+/*EMV*/
+#define TAG_EMV_ISSUER_IDENTIFICATION_NB            0x42
+
+#define TAG_EMV_AID_CARD                            0x4F
+#define TAG_EMV_APPLICATION_LABEL                   0x50
+
+#define TAG_EMV_TRACK_1_EQU_DATA                    0x56
+#define TAG_EMV_TRACK_2_EQU_DATA                    0x57
+
+#define TAG_EMV_APPLI_PAN                           0x5A
+
+#define TAG_EMV_CARDHOLDER_NAME                     0x5F20
+#define TAG_EMV_PROPRIETARY_TAG_5F21                0x5F21
+
+#define TAG_EMV_APPLI_EXPIRATION_DATE               0x5F24
+#define TAG_EMV_APPLI_EFFECTIVE_DATE                0x5F25
+
+#define TAG_EMV_ISSUER_COUNTRY_CODE                 0x5F28
+
+#define TAG_EMV_TRANSACTION_CURRENCY_CODE           0x5F2A
+
+#define TAG_EMV_LANGUAGE_PREFERENCE                 0x5F2D
+
+#define TAG_EMV_SERVICE_CODE                        0x5F30
+
+#define TAG_EMV_APPLI_PAN_SEQUENCE_NUMBER           0x5F34
+
+#define TAG_EMV_TRANSACTION_CURRENCY_EXPONENT       0x5F36
+
+#define TAG_EMV_ISSUER_URL                          0x5F50
+
+#define TAG_EMV_IBAN                                0x5F53
+#define TAG_EMV_BANK_IDENTIFIER_CODE                0x5F54
+#define TAG_EMV_ISSUER_COUNTRY_CODE_A2_FORMAT       0x5F55
+#define TAG_EMV_ISSUER_COUNTRY_CODE_A3_FORMAT       0x5F56
+#define TAG_EMV_ACCOUNT_TYPE						0x5F57
+
+#define TAG_EMV_APPLI_TEMPLATE                      0x61
+
+#define TAG_EMV_FCI_TEMPLATE                        0x6F
+#define TAG_EMV_READ_RECORD_RESP_MESSAGE            0x70
+#define TAG_EMV_ISSUER_SCRIPT_TEMPLATE_1            0x71
+#define TAG_EMV_ISSUER_SCRIPT_TEMPLATE_2            0x72
+#define TAG_EMV_DICTIONARY_DISCR_TEMPLATE           0x73
+
+#define TAG_EMV_RESPONSE_MESSAGE_TEMPLATE_FORMAT_2  0x77
+
+#define TAG_EMV_RESPONSE_MESSAGE_TEMPLATE_FORMAT_1  0x80
+#define TAG_EMV_AMOUNT_AUTH_BIN                     0x81
+#define TAG_EMV_AIP                                 0x82
+#define TAG_EMV_COMMAND_TEMPLATE                    0x83
+#define TAG_EMV_DF_NAME                             0x84
+
+#define TAG_EMV_ISSUER_SCRIPT_COMMAND               0x86
+#define TAG_EMV_APPLI_PRIORITY_INDICATOR            0x87
+#define TAG_EMV_SFI                                 0x88
+#define TAG_EMV_AUTHORISATION_CODE                  0x89
+#define TAG_EMV_AUTHORISATION_RESPONSE_CODE         0x8A
+#define TAG_EMV_POI_INFORMATION                     0x8B
+#define TAG_EMV_CDOL_1                              0x8C
+#define TAG_EMV_CDOL_2                              0x8D
+#define TAG_EMV_CVM_LIST_CARD                       0x8E
+#define TAG_EMV_CA_PUBLIC_KEY_INDEX_CARD            0x8F
+#define TAG_EMV_ISSUER_PUBLIC_KEY_CERTIFICATE       0x90
+#define TAG_EMV_ISSUER_AUTHENTICATION_DATA          0x91
+#define TAG_EMV_ISSUER_PUBLIC_KEY_REMAINDER         0x92
+#define TAG_EMV_SIGNED_STATIC_APPLI_DATA            0x93
+#define TAG_EMV_AFL                                 0x94
+#define TAG_EMV_TVR                                 0x95
+#define TAG_EMV_CORE_READER_SUPPORT_KERNEL			0x96
+
+#define TAG_EMV_TDOL                                0x97
+#define TAG_EMV_TC_HASH_VALUE                       0x98
+#define TAG_EMV_TRANSACTION_PIN_DATA                0x99
+#define TAG_EMV_TRANSACTION_DATE                    0x9A
+#define TAG_EMV_TSI                                 0x9B
+#define TAG_EMV_TRANSACTION_TYPE                    0x9C
+#define TAG_EMV_DDF_NAME                            0x9D
+
+#define TAG_EMV_ACQUIRER_IDENTIFIER                 0x9F01
+#define TAG_EMV_AMOUNT_AUTH_NUM                     0x9F02
+#define TAG_EMV_AMOUNT_OTHER_NUM                    0x9F03
+#define TAG_EMV_AMOUNT_OTHER_BIN                    0x9F04
+#define TAG_EMV_APPLI_DISCRET_DATA                  0x9F05
+#define TAG_EMV_AID_TERMINAL                        0x9F06
+#define TAG_EMV_APPLI_USAGE_CONTROL                 0x9F07
+#define TAG_EMV_APPLI_VERSION_NUMBER_CARD           0x9F08
+#define TAG_EMV_APPLI_VERSION_NUMBER_TERM           0x9F09
+#define TAG_EMV_APP_SPECIFIC_REGISTERED_PROPRIETARY 0x9F0A
+#define TAG_EMV_CARDHOLDER_NAME_EXTENDED            0x9F0B
+
+#define TAG_EMV_IAC_DEFAULT                         0x9F0D
+#define TAG_EMV_IAC_DENIAL                          0x9F0E
+#define TAG_EMV_IAC_ONLINE                          0x9F0F
+#define TAG_EMV_ISSUER_APPLI_DATA                   0x9F10
+#define TAG_EMV_ISSUER_CODE_TABLE_INDEX             0x9F11
+#define TAG_EMV_APPLI_PREFERED_NAME                 0x9F12
+#define TAG_EMV_LAST_ONLINE_ATC_REGISTER            0x9F13
+#define TAG_EMV_LOWER_CONSECUTIVE_OFFLINE_LIMIT     0x9F14
+#define TAG_EMV_MERCHANT_CATEGORY_CODE              0x9F15
+#define TAG_EMV_MERCHANT_IDENTIFIER                 0x9F16
+#define TAG_EMV_PIN_TRY_COUNTER                     0x9F17
+#define TAG_EMV_ISSUER_SCRIPT_IDENTIFIER            0x9F18
+#define TAG_EMV_TOKEN_REQUESTOR_ID                  0x9F19
+#define TAG_EMV_TERMINAL_COUNTRY_CODE               0x9F1A
+#define TAG_EMV_TERMINAL_FLOOR_LIMIT                0x9F1B
+#define TAG_EMV_TERMINAL_IDENTIFICATION             0x9F1C
+#define TAG_EMV_TERMINAL_RISK_MANAGEMENT_DATA       0x9F1D
+#define TAG_EMV_IFD_SERIAL_NUMBER                   0x9F1E
+#define TAG_EMV_TRACK_1_DISCRET_DATA                0x9F1F
+#define TAG_EMV_TRACK_2_DISCRET_DATA                0x9F20
+#define TAG_EMV_TRANSACTION_TIME                    0x9F21
+#define TAG_EMV_CA_PUBLIC_KEY_INDEX_TERM            0x9F22
+#define TAG_EMV_UPPER_CONSECUTIVE_OFFLINE_LIMIT     0x9F23
+#define TAG_EMV_PAYMENT_ACCOUNT_REFERENCE           0x9F24
+#define TAG_EMV_LAST_4_DIGITS_OFL_PAN               0x9F25
+#define TAG_EMV_APPLICATION_CRYPTOGRAM              0x9F26
+#define TAG_EMV_CRYPTOGRAM_INFO_DATA                0x9F27
+
+#define TAG_EMV_EXTENDED_SELECTION                  0x9F29
+#define TAG_EMV_KERNEL_ID                           0x9F2A
+
+#define TAG_EMV_ICC_PIN_ENCIPH_PK_CERTIFICATE       0x9F2D
+#define TAG_EMV_ICC_PIN_ENCIPH_PK_EXPONENT          0x9F2E
+#define TAG_EMV_ICC_PIN_ENCIPH_PK_REMAINDER         0x9F2F
+
+#define TAG_EMV_ISSUER_PK_EXPONENT                  0x9F32
+#define TAG_EMV_TERMINAL_CAPABILITIES               0x9F33
+#define TAG_EMV_CVM_RESULTS                         0x9F34
+#define TAG_EMV_TERMINAL_TYPE                       0x9F35
+#define TAG_EMV_ATC                                 0x9F36
+#define TAG_EMV_UNPREDICTABLE_NUMBER                0x9F37
+#define TAG_EMV_PDOL                                0x9F38
+#define TAG_EMV_POS_ENTRY_MODE                      0x9F39
+#define TAG_EMV_AMOUNT_REF_CURRENCY                 0x9F3A
+#define TAG_EMV_APPLI_REF_CURRENCY                  0x9F3B
+#define TAG_EMV_TRANSACTION_REF_CURRENCY_CODE       0x9F3C
+#define TAG_EMV_TRANSACTION_REF_CURRENCY_EXPONENT   0x9F3D
+#define TAG_EMV_TERMINAL_CATEGORIES_SUPPORTED_LIST  0x9F3E
+#define TAG_EMV_SELECTION_DATA_OBJECT_LIST          0x9F3F
+
+#define TAG_EMV_ADD_TERMINAL_CAPABILITIES           0x9F40
+#define TAG_EMV_TRANSACTION_SEQUENCE_COUNTER        0x9F41
+#define TAG_EMV_APPLI_CURRENCY_CODE                 0x9F42
+#define TAG_EMV_APPLI_REF_CURRENCY_EXPONENT         0x9F43
+#define TAG_EMV_APPLI_CURRENTCY_EXPONENT            0x9F44
+#define TAG_EMV_DATA_AUTHENTICATION_CODE            0x9F45
+#define TAG_EMV_ICC_PK_CERTIFICATE                  0x9F46
+#define TAG_EMV_ICC_PK_EXPONENT                     0x9F47
+#define TAG_EMV_ICC_PK_REMAINDER                    0x9F48
+#define TAG_EMV_DDOL                                0x9F49
+#define TAG_EMV_SDA_TAG_LIST                        0x9F4A
+#define TAG_EMV_SIGNED_DYNAMIC_APPLI_DATA           0x9F4B
+#define TAG_EMV_ICC_DYNAMIC_NUMBER                  0x9F4C
+#define TAG_EMV_LOG_ENTRY                           0x9F4D
+#define TAG_EMV_MERCHANT_NAME_AND_LOCATION          0x9F4E
+#define TAG_EMV_LOG_FORMAT                          0x9F4F
+
+#define TAG_EMV_CARDHOLDER_VERIFICATION_STATUS      0x9F50
+#define TAG_EMV_OFFLINE_ACCUMULATOR_BALANCE         0x9F50
+#define TAG_EMV_DRDOL                               0x9F51
+#define TAG_EMV_TERMINAL_COMPATIBILITY_INDICATOR    0x9F52
+#define TAG_EMV_DYNAMIC_TERMINAL_INTERCHANGE_PROFILE 0x9F53
+#define TAG_EMV_TRANSACTION_CATEGORY_CODE           0x9F53
+#define TAG_EMV_CONTACTLESS_CARD_VERIFICATION_RESULTS 0x9F53
+#define TAG_EMV_DS_ODS_CARD                         0x9F54
+
+#define TAG_EMV_MEMBERSHIP_PRODUCT_IDENTIFIER       0x9F5A
+#define TAG_EMV_DSDOL                               0x9F5B
+#define TAG_EMV_ISSUER_SCRIPT_RESULT                0x9F5B
+#define TAG_EMV_PRODUCT_MEMBERSHIP_NUMBER           0x9F5B
+#define TAG_EMV_DS_REQUESTED_OPERATOR_ID            0x9F5C
+#define TAG_EMV_AVAILABLE_OFFLINE_SPENDING_AMOUNT   0x9F5D
+#define TAG_EMV_APPLICATION_CAPABILITIES_INFORMATION 0x9F5D
+#define TAG_EMV_DS_ID                               0x9F5E
+#define TAG_EMV_DS_SLOT_AVAILABILITY                0x9F5F
+#define TAG_EMV_JCB_OFFLINE_BALANCE                 0x9F5F
+#define TAG_EMV_CVC3_TRACK1                         0x9F60
+#define TAG_EMV_ISSUER_UPDATE_PARAMETER             0x9F60
+#define TAG_EMV_CVC3_TRACK2                         0x9F61
+#define TAG_PBOC_CVM_IDCARD_VERIFY_IDNUMBER         0x9F61
+#define TAG_EMV_PCVC3_TRACK1                        0x9F62
+#define TAG_PBOC_CVM_IDCARD_VERIFY_IDTYPE           0x9F62
+#define TAG_EMV_PUNATC_TRACK1                       0x9F63
+#define TAG_EMV_NATC_TRACK1                         0x9F64
+#define TAG_EMV_PCVC3_TRACK2                        0x9F65
+#define TAG_EMV_TERMINAL_TRANSACTION_QUALIFIER      0x9F66
+#define TAG_EMV_PUNATC_TRACK2                       0x9F66
+#define TAG_EMV_NATC_TRACK2                         0x9F67
+
+#define TAG_EMV_CARD_AUTHENTICATION_RELATED_DATA    0x9F69
+#define TAG_EMV_UDOL                                0x9F69
+#define TAG_EMV_UNPREDICTABLE_NUMBER_NUMERIC        0x9F6A
+#define TAG_EMV_TRACK2_DATA                         0x9F6B
+#define TAG_EMV_CARD_TRANSACTION_QUALIFIERS         0x9F6C
+#define TAG_NSICCS_ISSUER_BANK_ID                   0x9F6C
+#define TAG_AMEX_CTL_READER_CAPABILITIES            0x9F6D
+#define TAG_EMV_MAG_STRIPE_APPLICATION_VERSION_NUMBER_READER 0x9F6D
+#define TAG_AMEX_ENHANCED_CTL_READER_CAPABILITIES   0x9F6E
+#define TAG_EMV_DEVICE_INFORMATION                  0x9F6E
+#define TAG_EMV_PAYWAVE_FORM_FACTOR_INDICATOR       0x9F6E
+#define TAG_EMV_DPAS_FORM_FACTOR_INDENTIFIER        0x9F6E
+#define TAG_EMV_THIRD_PARTY_DATA                    0x9F6E
+#define TAG_EMV_DS_SLOT_MANAGEMENT_CONTROL          0x9F6F
+#define TAG_EMV_PROTECTED_DATA_ENVELOPE_1           0x9F70
+#define TAG_EMV_CARD_INTERFACE_AND_PAYMENT_CAPABILITIES 0x9F70
+#define TAG_AMEX_MOBILE_CVM_RESULTS					0x9F71
+#define TAG_EMV_CARD_PROCESSING_REQUIREMENTS        0x9F71
+#define TAG_EMV_PROTECTED_DATA_ENVELOPE_2           0x9F71
+#define TAG_EMV_PROTECTED_DATA_ENVELOPE_3           0x9F72
+#define TAG_EMV_PROTECTED_DATA_ENVELOPE_4           0x9F73
+#define TAG_EMV_PROTECTED_DATA_ENVELOPE_5           0x9F74
+#define TAG_EMV_UNPROTECTED_DATA_ENVELOPE_1         0x9F75
+#define TAG_EMV_UNPROTECTED_DATA_ENVELOPE_2         0x9F76
+#define TAG_EMV_UNPROTECTED_DATA_ENVELOPE_3         0x9F77
+#define TAG_EMV_UNPROTECTED_DATA_ENVELOPE_4         0x9F78
+#define TAG_BANCOMAT_FFI                            0x9F78
+#define TAG_EMV_UNPROTECTED_DATA_ENVELOPE_5         0x9F79
+#define TAG_BANCOMAT_IAC_SWITCH_INTERFACE           0x9F79
+#define TAG_EMV_PAYWAVE_CUSTOMER_EXCLUSIVE_DATA     0x9F7C
+#define TAG_EMV_PARTNER_DISCRETIONARY_DATA          0x9F7C
+#define TAG_EMV_MERCHANT_CUSTOM_DATA                0x9F7C
+#define TAG_EMV_DS_SUMMARY_1                        0x9F7D
+#define TAG_EMV_MOBILE_SUPPORT_INDICATOR            0x9F7E
+#define TAG_EMV_DS_UNPREDICTABLE_NUMBER             0x9F7F
+
+#define TAG_EMV_PURE_ISSUER_SCRIPT_RESULTS			0x9F73
+#define TAG_EMV_PURE_DATA_ELEMENTS_UPDATE_RESULT	0x9F74
+#define TAG_EMV_TERMINAL_TRANSACTION_DATA			0x9F76
+
+#define TAG_EMV_FCI_PROPRIETARY_TEMPLATE            0xA5
+
+#define TAG_EMV_FCI_ISSUER_DISCRET_DATA             0xBF0C
+
+#define TAG_EMV_DATA_STORAGE_UPDATE_TEMPLATE        0xBF10
+#define TAG_EMV_WRITE_DATA_STORAGE_TEMPLATE         0xBF11
+
+#define TAG_EMV_MEMORY_SLOT_UPDATE_TEMPLATE			0xBF70
+#define TAG_EMV_MEMORY_SLOT_READ_TEMPLATE			0xBF71
+
+#define TAG_EMV_PROPRIETARY_TAG_C1                  0xC1
+#define TAG_EMV_PROPRIETARY_TAG_C2                  0xC2
+#define TAG_EMV_PROPRIETARY_TAG_C3                  0xC3
+#define TAG_EMV_PROPRIETARY_TAG_C4                  0xC4
+#define TAG_EMV_PROPRIETARY_TAG_C5                  0xC5
+#define TAG_EMV_PROPRIETARY_TAG_C6                  0xC6
+#define TAG_EMV_PROPRIETARY_TAG_C7                  0xC7
+
+#define TAG_EMV_PROPRIETARY_TAG_CA                  0xCA
+
+#define TAG_EMV_OFFLINE_BALANCE                     0xD1
+
+#define TAG_EMV_PROPRIETARY_TAG_D7                  0xD7
+
+#define TAG_RUPAY_SERVICE_DIRECTORY                 0xDF07
+
+#define TAG_EMV_CARD_FEATURE_VERSION_NUMBER         0xDF3A
+#define TAG_EMV_CARD_FEATURE_DESCRIPTOR             0xDF3B
+#define TAG_EMV_EXTENDED_LOGGING_DATA               0xDF3C
+#define TAG_EMV_DATA_STORAGE_DIRECTORY              0xDF3D
+#define TAG_EMV_CARD_ID                             0xDF3E
+#define TAG_EMV_DATA_STORE                          0xDF3F
+
+#define TAG_EMV_POS_CARDHOLDER_INTERACTION_INFORMATION 0xDF4B
+
+#define TAG_MIR_TERMINAL_FLOOR_LIMIT				0xDF51
+#define TAG_MIR_TERMINAL_NO_CVM_LIMIT				0xDF52
+#define TAG_MIR_TERMINAL_CTL_LIMIT_NON_CDCVM		0xDF53
+#define TAG_MIR_TERMINAL_CTL_LIMIT_CDCVM			0xDF54
+#define TAG_MIR_TERMINAL_TPM_CAPABILITIES	        0xDF55
+#define TAG_MIR_TRANSACTION_RECOVERY_LIMIT			0xDF56
+
+#define TAG_EMV_DS_INPUT_CARD                       0xDF60
+#define TAG_EMV_DS_DIGEST_H                         0xDF61
+#define TAG_EMV_DS_ODS_INFO                         0xDF62
+#define TAG_EMV_DS_ODS_TERM                         0xDF63
+
+#define TAG_EMV_SM_ALG_SUPPORT_INDICATOR            0xDF69
+
+#define TAG_EMV_LOYALTY_PROGRAM_ID                  0xDF70
+#define TAG_EMV_VALUE_ADDED_TAX1                    0xDF71
+#define TAG_EMV_VALUE_ADDED_TAX2                    0xDF72
+
+#define TAG_EMV_TERMINAL_AID_VALUE_SUPPORTED	    0xDF7F
+
+#define TAG_EMV_DS_SUMMARY_2                        0xDF8101
+#define TAG_EMV_DS_SUMMARY_3                        0xDF8102
+
+#define TAG_EMV_BALANCE_READ_BEFORE_GEN_AC          0xDF8104
+#define TAG_EMV_BALANCE_READ_AFTER_GEN_AC           0xDF8105
+#define TAG_EMV_DATA_NEEDED                         0xDF8106
+#define TAG_EMV_CDOL1_RELATED_DATA                  0xDF8107
+#define TAG_EMV_DS_AC_TYPE                          0xDF8108
+#define TAG_EMV_DS_INPUT_TERM                       0xDF8109
+#define TAG_EMV_DS_ODS_INFO_FOR_READER              0xDF810A
+#define TAG_EMV_DS_SUMMARY_STATUS                   0xDF810B
+#define TAG_EMV_KERNEL_ID_PAYPASS                   0xDF810C
+#define TAG_EMV_DSVN_TERM                           0xDF810D
+#define TAG_EMV_POST_GEN_AC_PUT_DATA_STATUS         0xDF810E
+#define TAG_EMV_PRE_GEN_AC_PUT_DATA_STATUS          0xDF810F
+#define TAG_EMV_PROCEED_TO_FIRST_WRITE_FLAG         0xDF8110
+#define TAG_EMV_PDOL_RELATED_DATA                   0xDF8111
+#define TAG_EMV_TAGS_TO_READ                        0xDF8112
+#define TAG_EMV_DRDOL_RELATED_DATA                  0xDF8113
+#define TAG_EMV_REFERENCE_CONTROL_PARAMETER         0xDF8114
+#define TAG_EMV_ERROR_INDICATION                    0xDF8115
+#define TAG_EMV_USER_INTERFACE_REQUEST_DATA         0xDF8116
+#define TAG_EMV_CARD_DATA_INPUT_CAPABILITY          0xDF8117
+#define TAG_EMV_CVM_CAPABILITY_CVM_REQUIRED         0xDF8118
+#define TAG_EMV_CVM_CAPABILITY_NO_CVM_REQUIRED      0xDF8119
+#define TAG_EMV_DEFAULT_UDOL                        0xDF811A
+#define TAG_EMV_KERNEL_CONFIGURATION                0xDF811B
+#define TAG_EMV_MAX_LIFETIME_OF_TORN_TRANSACTION_LOG_RECORD 0xDF811C
+#define TAG_EMV_MAX_NUMBER_OF_TORN_TRANSACTION_LOG_RECORDS 0xDF811D
+#define TAG_EMV_MAG_STRIPE_CVM_CAPABILITY_CVM_REQUIRED 0xDF811E
+#define TAG_EMV_SECURITY_CAPABILITY                 0xDF811F
+#define TAG_EMV_TERMINAL_ACTION_CODE_DEFAULT        0xDF8120
+#define TAG_EMV_TERMINAL_ACTION_CODE_DENIAL         0xDF8121
+#define TAG_EMV_TERMINAL_ACTION_CODE_ONLINE         0xDF8122
+#define TAG_EMV_READER_CONTACTLESS_FLOOR_LIMIT      0xDF8123
+#define TAG_EMV_READER_CONTACTLESS_TRANSACTION_LIMIT_NO_ON_DEVICE_CVM 0xDF8124
+#define TAG_EMV_READER_CONTACTLESS_TRANSACTION_LIMIT_ON_DEVICE_CVM 0xDF8125
+#define TAG_EMV_READER_CVM_REQUIRED_LIMIT           0xDF8126
+#define TAG_EMV_TIME_OUT_VALUE                      0xDF8127
+#define TAG_EMV_IDS_STATUS                          0xDF8128
+#define TAG_EMV_OUTCOME_PARAMETER_SET               0xDF8129
+#define TAG_EMV_DD_CARD_TRACK1                      0xDF812A
+#define TAG_EMV_DD_CARD_TRACK2                      0xDF812B
+#define TAG_EMV_MAG_STRIPE_CVM_CAPABILITY_NO_CVM_REQUIRED 0xDF812C
+#define TAG_EMV_MESSAGE_HOLD_TIME                   0xDF812D
+
+#define TAG_EMV_HOLD_TIME_VALUE                     0xDF8130
+#define TAG_EMV_PHONE_MESSAGE_TABLE                 0xDF8131
+#define TAG_EMV_MINIMUM_RELAY_RESISTANCE_GRACE_PERIOD 0xDF8132
+#define TAG_EMV_MAXIMUM_RELAY_RESISTANCE_GRACE_PERIOD 0xDF8133
+#define TAG_EMV_TERMINAL_EXCECTED_TRANSMISSION_TIME_FOR_RELAY_RESISTANCE_C_APDU 0xDF8134
+#define TAG_EMV_TERMINAL_EXCECTED_TRANSMISSION_TIME_FOR_RELAY_RESISTANCE_R_APDU 0xDF8135
+#define TAG_EMV_RELAY_RESISTANCE_ACCURACY_THRESHOLD 0xDF8136
+#define TAG_EMV_RELAY_RESISTANCE_TRANSMISSION_TIME_MISMATCH_THRESHOLD 0xDF8137
+
+#define TAG_EMV_TRANSIT_AGENT_ID					0xDF72
+#define TAG_EMV_TRANSIT_RELATED_DATA				0xDF73
+
+#define TAG_EMV_TERMINAL_RELAY_RESISTANCE_ENTROPY   0xDF8301
+#define TAG_EMV_DEVICE_RELAY_RESISTANCE_ENTROPY     0xDF8302
+#define TAG_EMV_MIN_TIME_FOR_PROCESSING_RELAY_RESISTANCE_APDU 0xDF8303
+#define TAG_EMV_MAX_TIME_FOR_PROCESSING_RELAY_RESISTANCE_APDU 0xDF8304
+#define TAG_EMV_DEVICE_ESTIMATED_TRANSMISSION_TIME_FOR_RELAY_RESISTANCE_R_APDU 0xDF8305
+#define TAG_EMV_MEASURED_RELAY_RESISTANCE_PROCESSING_TIME 0xDF8306
+#define TAG_EMV_RRP_COUNTER                         0xDF8307
+
+#define TAG_EMV_TORN_RECORD                         0xFF8101
+#define TAG_EMV_TAGS_TO_WRITE_BEFORE_GEN_AC         0xFF8102
+#define TAG_EMV_TAGS_TO_WRITE_AFTER_GEN_AC          0xFF8103
+#define TAG_EMV_DATA_TO_SEND                        0xFF8104
+#define TAG_EMV_DATA_RECORD                         0xFF8105
+#define TAG_EMV_DISCRETIONARY_DATA                  0xFF8106
+
+/*PBOC*/
+#define TAG_PBOC_AUTHENTICATION_ID_NUMBER           0x9F61
+#define TAG_PBOC_AUTHENTICATION_ID_TYPE             0x9F62
+
+/*VISA Crosstesting Custom TAG List*/
+#define CROSS_TAG_END_WITH_PPSE                     0x0001
+#define CROSS_TAG_END_WITH_AID                      0x0002
+#define CROSS_TAG_END_WITH_GPO                      0x0003
+#define CROSS_TAG_END_WITH_READ_RECORD              0x0004
+
+#define CROSS_TAG_TTQ                               0xC001
+#define CROSS_TAG_PRELIMINARY_TRANSACTION_PROCESSING 0xC002
+#define CROSS_TAG_STATUS_CHECKING                   0xC003
+#define CROSS_TAG_KEY_REVOCATION                    0xC004
+#define CROSS_TAG_EXCEPTION_FILE                    0xC005
+#define CROSS_TAG_CONTACTLESS_FLOOR_LIMIT_CHECK     0xC006
+#define CROSS_TAG_CONTACTLESS_FLOOR_LIMIT           0xC007
+#define CROSS_TAG_CONTACTLESS_TRANSACTION_LIMIT_CHECK 0xC008
+#define CROSS_TAG_CONTACTLESS_TRANSACTION_LIMIT     0xC009
+#define CROSS_TAG_AMOUNT_ZERO_CHECKING              0xC00A
+#define CROSS_TAG_CONTACTLESS_CVM_LIMIT_CHECK       0xC00B
+#define CROSS_TAG_CONTACTLESS_CVM_LIMIT             0xC00C
+#define CROSS_TAG_TERMINAL_FLOOR_LIMIT              0xC00D
+#define CROSS_TAG_ZERO_AMOUNT_AUTHORIZED            0xC00E
+#define CROSS_TAG_VARIABLE_TRANSACTION_AMOUNT       0xC00F
+#define CROSS_TAG_APPLICATION_EXPIRATION_CHECK      0xC010
+#define CROSS_TAG_DYNAMIC_READER_LIMIT              0xC011
+#define CROSS_TAG_DISPLAY                           0xC012
+#define CROSS_TAG_DISPLAY_AMOUNT                    0xC013
+#define CROSS_TAG_DISPLAY_AOSA                      0xC014
+#define CROSS_TAG_PRINT_A_RECEIPT                   0xC015
+#define CROSS_TAG_PRINT_AOSA                        0xC016
+#define CROSS_TAG_PRINT_A_RECEIPT_FOR_DECLINED_TRANSACTION 0xC017
+#define CROSS_TAG_DATA_NOT_TRANSMITTED_TO_THER_TERMINAL_CAN_BE_CONFIGURED 0xC018
+#define CROSS_TAG_CVN_17_FUNCTIONALITY              0xC019
+#define CROSS_TAG_FORMATTING_TRACK_1                0xC01A
+#define CROSS_TAG_FORMATTING_TRACK_2                0xC01B
+#define CROSS_TAG_TRANSACTION_TYPE                  0xC01C
+#define CROSS_TAG_TRANSACTION_DATE                  0xC01D
+#define CROSS_TAG_TRANSACTION_TIME                  0xC01E
+#define CROSS_TAG_TERMINAL_COUNTRY_CODE             0xC01F
+#define CROSS_TAG_TERMINAL_CURRENCY_CODE            0xC020
+#define CROSS_TAG_PRINT_LOG                         0xC021
+#define CROSS_TAG_LOOP_MODE_OF_TRANSACTION          0xC022
+#define CROSS_TAG_AMOUNT_AUTHORIZED                 0xC023
+#define CROSS_TAG_PRE_DEFINED_TIMEOUT               0xC024
+
+#define CROSS_TAG_TRANSACTION_RESULT_DATA           0xC101
+
+/*BCTC Automation Test Tool Custom TAG List*/
+#define TAG_BCTC_TRANSACTION_RESULT                 0x03
+#define TAG_BCTC_TERMINAL_ELECTRONIC_CASH_LIMIT     0x9F7B
+#define TAG_BCTC_APP_SELECTION_INDICATOR            0xDF01
+#define TAG_BCTC_PUBLIC_KEY_MOUDLE                  0xDF02
+#define TAG_BCTC_PUBLIC_KEY_CHECK_VALUE             0xDF03
+#define TAG_BCTC_PUBLIC_KEY_EXPONENT                0xDF04
+#define TAG_BCTC_PUBLIC_KEY_EXPIRED_DATE            0xDF05
+#define TAG_BCTC_PUBLIC_KEY_HASH_ALGORITHM          0xDF06
+#define TAG_BCTC_PBULIC_KEY_SIGNATURE_ALGORITHM     0xDF07
+#define TAG_BCTC_PUBLIC_KEY_SERIAL_NUMBER           0xDF08
+#define TAG_BCTC_TERMINAL_ACTION_CODE_DEFAULT       0xDF11
+#define TAG_BCTC_TERMINAL_ACTION_CODE_ONLINE        0xDF12
+#define TAG_BCTC_TERMINAL_ACTION_CODE_DENIAL        0xDF13
+#define TAG_BCTC_DEFAULT_DDOL                       0xDF14
+#define TAG_BCTC_THRESHOLD_VALUE_FOR_BIASED_RANDOM_SELECTION 0xDF15
+#define TAG_BCTC_MAX_TARGET_PERCENTAGE_FOR_BIASED_RANDOM_SELECTION 0xDF16
+#define TAG_BCTC_TARGET_PERCENTAGE_FOR_RANDOM_SELECTION 0xDF17
+#define TAG_BCTC_CONTACTLESS_OFFLINE_FLOOR_LIMIT    0xDF19
+#define TAG_BCTC_CONTACTLESS_TRANSACTION_LIMIT      0xDF20
+#define TAG_BCTC_TERMINAL_EXECUTE_CVM_LIMIT         0xDF21
+#define TAG_BCTC_ON_DEVICE_CVM_CONTACTLESS_TRANSACTION_LIMIT 0xDF24
+#define TAG_BCTC_TRANSACTION_AMOUNT                 0xDF29
+#define TAG_BCTC_JCB_COMBINATION_OPTIONS            0xDF40
+#define TAG_BCTC_REMOVAL_TIMEOUT                    0xDF41
+#define TAG_BCTC_JCB_TERMINAL_INTERCHANGE_PROFILE   0xDF42
+#define TAG_BCTC_TRANSACTION_MODE                   0xDF43
+#define TAG_BCTC_TRANSACTION_REFERENCE_CURRENCY_CONVERSION 0xDF8101
+#define TAG_BCTC_DEFAULT_TDOL                       0xDF8102
+#define TAG_BCTC_REVOKE_PUBLIC_KEY_SERIAL_NUMBER    0xDF8105
+#define TAG_BCTC_MAG_STRIPE_TRACK2                  0xDF8107
+#define TAG_BCTC_CONTACTLESS_STATUS_CHECK           0xDFC108
+#define TAG_BCTC_ODA_RESULT                         0xDFC10B
+#define TAG_BCTC_NFC_TRANSACTION_RESULT             0x9F8373
+
+/*--------Attributes Defination----------------------------------------------*/
+#define FORMAT_A                                    0x00000001
+#define FORMAT_AN                                   0x00000002
+#define FORMAT_ANS                                  0x00000003
+#define FORMAT_B                                    0x00000004
+#define FORMAT_CN                                   0x00000005
+#define FORMAT_N                                    0x00000006
+#define FORMAT_VAR                                  0x00000007
+
+#define SOURCE_TERMINAL                             0x80000000
+#define SOURCE_ICC                                  0x40000000
+#define SOURCE_APP_ICS                              0x20000000
+#define SOURCE_APP_ISSUER                           0x10000000
+#define SOURCE_ENTRYPOINT_ICC                       0x08000000
+
+#define ITEM_MANDATORY                              0x00800000
+#define ITEM_REQUIRED                               0x00400000
+#define ITEM_CONDITIONAL                            0x00200000
+#define ITEM_OPTIONAL                               0x00100000
+
+#define MULTI_OCCURENCE_IGNORE                      0x00080000
+#define MULTI_OCCURENCE_FORBIDDEN                   0x00040000
+#define MULTI_OCCURENCE_ALLOWE                      0x00020000
+
+#define DATA_RECORD_REQUIRED                        0x00008000
+#define TORN_RECOVERY_CONTEXT                       0x00004000
+
+#define TEMPLATE_NONE                               0x00000000
+#define TEMPLATE_6F                                 0x00000080
+#define TEMPLATE_70                                 0x00000040
+#define	TEMPLATE_77                                 0x00000020
+#define TEMPLATE_80                                 0x00000010
+#define TEMPLATE_A5                                 0x00000008
+#define TEMPLATE_BF0C                               0x00000004
+#define	TEMPLATE_61                                 0x00000002
+#define TEMPLATE_70_77                              (TEMPLATE_70|TEMPLATE_77)
+#define TEMPLATE_70_BF0C                            (TEMPLATE_70|TEMPLATE_BF0C)
+
+
+/*-----------------------------------------------------------------------------
+|   Enumerations
++----------------------------------------------------------------------------*/
+
+
+
+/*-----------------------------------------------------------------------------
+|   Typedefs
++----------------------------------------------------------------------------*/
+typedef struct _ElementAttributes
+{
+	unsigned int tag;
+	unsigned int format;
+	unsigned int min_len;
+	unsigned int max_len;
+	unsigned int property;
+}ElementAttributes_t,*pElementAttributes_t;
+
+/*-----------------------------------------------------------------------------
+|   Variables
++----------------------------------------------------------------------------*/
+
+
+
+/*-----------------------------------------------------------------------------
+|   Constants
++----------------------------------------------------------------------------*/
+
+
+
+/*-----------------------------------------------------------------------------
+|   prototypes
++----------------------------------------------------------------------------*/
+
+/*
+*******************************************************************************
+*   End of File
+*******************************************************************************
+*/
+
+#undef GLOBAL
+
+#endif  /* #ifndef _TAG_LIST_H */

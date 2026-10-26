@@ -368,7 +368,7 @@ short PowerOnProtect(void)
     img = lv_gif_create(lv_scr_act());
     lv_gif_set_src(img, BOOT_GIF);
     lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
-    unsigned int ulStartTime = Lib_SysGetTimer();
+    //unsigned int ulStartTime = Lib_SysGetTimer();
     while (1)
     {
         Lib_WDGReloadCounter();
@@ -378,17 +378,12 @@ short PowerOnProtect(void)
 
         //UIText(2*LCD_FONT_SIZE, 4, DISP_MODE_NORMAL, "CURRENT POWER:%03d", gBatLastCapacity);
 
-        if (IS_TIME_OUT(ulStartTime, 4000))
+        //if (IS_TIME_OUT(ulStartTime, 4000))
         {
             TRACE("gBatLastCapacity=%d %d %d\n", BatteryGetBatCapacity(), Lib_BatGetVoltage(), Lib_BatGetPowerOffVol());
 
             // Charging state, low battery threshold set to 5%, discharge state set to 20%
-            if ((Lib_ExtPower()) && (Lib_BatGetVoltage() > Lib_BatGetPowerOffVol()))
-            {
-                lv_obj_del(img);
-                return RET_OK;
-            }
-            else if ((!(Lib_ExtPower())) && (BatteryGetBatCapacity() > 10))
+            if ((Lib_BatGetVoltage() > Lib_BatGetPowerOffVol()))
             {
                 lv_obj_del(img);
                 return RET_OK;

@@ -17,7 +17,6 @@
 #include "MessageBox.h"
 #include "Menu.h"
 #include "Power.h"
-#include "LibEmvKernel.h"
 #include "Communication.h"
 #include "api_lvgl.h"
 #if HW_TPH
@@ -120,12 +119,13 @@ short OnlineTradeSetSendData(unsigned char *pucOut, unsigned short *pucOutLen)
 //-----------------------------------------------------------------------------
 short OnlineTradeDealRecvData(unsigned char *pucIn, unsigned short usInLen)
 {
+	TRACE("OnlineTradeDealRecvData");
+    TRACEBUF(pucIn, usInLen);
+
+#if 0
     unsigned char aucOnlineAfterBuf[100];
     int iBufLen = 0;
     unsigned char aucField39[2];
-
-	TRACE("OnlineTradeDealRecvData");
-    TRACEBUF(pucIn, usInLen);
 
     memcpy(aucField39, "\x30\x30", 2);
 
@@ -136,6 +136,7 @@ short OnlineTradeDealRecvData(unsigned char *pucIn, unsigned short usInLen)
 
 	// Online successful,issuing bank script processing
 	Lib_EmvAfterOnlineProcess(1, aucOnlineAfterBuf, iBufLen);
+#endif
 
 	return RET_OK;
 }
@@ -226,12 +227,12 @@ short UIOnlineTrade(int iTimeout, unsigned long ulOpCode)
     sprintf((char *)aucBuf, "%s\n%s%s $\n%s",TIP_TRADE_OK, TIP_AMOUNT, aucTemp, TIP_PRINTING);
 #else
     sprintf((char *)aucBuf, "%s\n%s%s $",TIP_TRADE_OK, TIP_AMOUNT, aucTemp);
+    result.timeout = 3000;
 #endif
     result.img = SUCCESS_IMG;
     result.title = TIP_SUCCESS;
     result.msg = (char *)aucBuf;
     result.fontColor = LV_COLOR_GREEN;
-    result.timeout = 3000;
 
     // Add transaction records
 	ApiAddRec(&g_trade_info);

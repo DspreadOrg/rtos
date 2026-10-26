@@ -17,6 +17,7 @@ include_directories(Application/include Driver/include
                     Middle/include
                     Lib/include
                     Emv
+                    EmvNew/include
                     Lvgl
                     Lvgl/porting
                     Lvgl/include/misc
@@ -40,22 +41,26 @@ else()
     return()
 endif()
 
-file(GLOB libtyEmvKernel  lib/libEmvKernel.a)
 file(GLOB libcJson  lib/libcJson.a)
 file(GLOB libTyTms  lib/libTms.a)
 file(GLOB libtyBat  lib/libBattery.a)
 file(GLOB libLvgl   lib/libLvgl_V8310.a)
+File(GLOB EMVNEW_LIB_FILES ${CMAKE_CURRENT_SOURCE_DIR}/EmvNew/lib/*.a)
 if(CONFIG_APPIMG_LOAD_FLASH)
     set(target mainapp_flash)
     file(GLOB MAINSRC  Application/Source/*.c
                        Application/Source/mainapp/*.c
                        Driver/Source/*.c
                        Middle/Source/*.c
-                       Emv/*.c
+                       EmvNew/*.c
                        Lvgl/porting/*.c)
                         
     add_appimg(${target} ${mainapp_flash_ldscript} ${MAINSRC})
-    target_link_libraries(${target} PRIVATE ${libCheck} ${libLvgl} ${libSDK} ${libtyEmvKernel} ${libcJson} ${libTyTms} ${libtyBat} ${libm_file_name} ${libc_file_name} ${libgcc_file_name} )
+    target_link_libraries(${target} PRIVATE ${libCheck} ${libLvgl} ${libSDK} ${libtyEmvKernel} ${libcJson} ${libTyTms} ${libtyBat} ${libm_file_name} ${libc_file_name} ${libgcc_file_name} 
+    -Wl,--start-group
+    ${EMVNEW_LIB_FILES}
+    -Wl,--end-group
+    )
 
     set(pac_config ${out_hex_dir}/${target}.json)
     set(pac_file ${out_hex_dir}/${target}.pac)

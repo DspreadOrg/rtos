@@ -18,7 +18,6 @@
 #include "M_NetInterface.h"
 #include "cJSON.h"
 #include "MessageBox.h"
-#include "EmvType.h"
 
 #if defined(MQTT_SUPPORT)
 // Network status of mqtt

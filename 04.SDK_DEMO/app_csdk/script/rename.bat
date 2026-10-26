@@ -1,7 +1,7 @@
 @echo off
 
 setlocal enabledelayedexpansion
-set SVN_VER=19792
+set SVN_VER=19887
 
 set OUT_PATH=%3_%4
 set VER_FILE=.\out\%OUT_PATH%\examples\Demo\CMakeFiles\mainapp_flash.dir\Application\Source\main.c.obj
