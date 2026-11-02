@@ -67,18 +67,7 @@ u8 DataEncryptProcess(u8 *pucSourceBuf, u8 *pucDestBuf, u16 usSourceLen, u8 ucKe
 		break;
 
 		case ALGORITHM_DUKPT:
-			if (ucKeyID >= 5)
-			{
-				TRACE("DUKPT-workkey-id-err!\r\n");
-				return 1;
-			}
-			TRACE("DUKPT-encrypt!\r\n");
 
-			if (FALSE == Lib_DukptEncryptOrDecrypt(0,ucKeyID,0,pucSourceBuf,&usSourceLen))
-			{
-				return 1;
-			}
-			memcpy(pucDestBuf, pucSourceBuf, usSourceLen);
 			break;
 
 		default:
@@ -88,37 +77,5 @@ u8 DataEncryptProcess(u8 *pucSourceBuf, u8 *pucDestBuf, u16 usSourceLen, u8 ucKe
     return 1;
 }
 
-u8 SetAlgorithmMode(u8 mode)
-{
-	if(mode <3)
-	{
-		g_ucSubAlgFlag = mode;
-		Lib_SetAlgorithmMode(mode);
-		return TRUE;
-	}
-	return FALSE;
-}
 
-u8 SetEcbOrCbcMode(u8 mode)
-{
-	if(mode <1)
-	{
-		g_SubEcbOrCbc = mode;
-		Lib_SetCipherMode(mode);
-		return TRUE;
-	}
-	return FALSE;
-}
-u8 SetCipherInitializationVector(u8 *IV)
-{
-	memcpy(s_SubVector,IV,8);
-	return Lib_SetCipherInitializationVector(IV);
-}
-
-#if 0
-u8 CalcMac(u8 *key, u8 *inputData, u16 inputDataLen, u8 *outputData)
-{
-    return TRUE;
-}
-#endif
 

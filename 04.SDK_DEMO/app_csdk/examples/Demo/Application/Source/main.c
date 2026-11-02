@@ -9,7 +9,7 @@
 #include "Power.h"
 #include "Logon.h"
 #include "Ui.h"
-#include "WifiConfig.h"
+#include "WiFiConfig.h"
 #include "Common.h"
 #include "Trade.h"
 #include "Idle.h"

@@ -9,7 +9,7 @@
 #include "Language.h"
 #include "Common.h"
 #include "Drv.h"
-#include "WifiConfig.h"
+#include "WiFiConfig.h"
 #include "TradeRecord.h"
 #include "MessageBox.h"
 #include "ParamManage.h"

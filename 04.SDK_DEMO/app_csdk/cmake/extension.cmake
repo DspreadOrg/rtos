@@ -113,7 +113,7 @@ function(add_uimage target ldscript)
     cpp_only(${gen_ldscript} ${ldscript} hal)
     add_executable(${target} ${ARGN})
     set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${out_hex_dir})
-    target_link_libraries(${target} PRIVATE -T $<TARGET_OBJECTS:${gen_ldscript}>)
+    target_link_libraries(${target} PRIVATE "-T$<TARGET_OBJECTS:${gen_ldscript}>")
     target_link_libraries(${target} PRIVATE -Wl,-Map=${target_map_file} -nostdlib -Wl,--gc-sections ${link_cref_option})
 
     add_custom_command(TARGET ${target} POST_BUILD
@@ -204,7 +204,7 @@ function(add_flash_lod target ldscript)
     cpp_only(${gen_ldscript} ${ldscript} hal)
     add_executable(${target} ${ARGN})
     set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${out_hex_dir})
-    target_link_libraries(${target} PRIVATE -T $<TARGET_OBJECTS:${gen_ldscript}>)
+    target_link_libraries(${target} PRIVATE "-T$<TARGET_OBJECTS:${gen_ldscript}>")
     target_link_libraries(${target} PRIVATE -Wl,-Map=${target_map_file} -nostdlib -Wl,--gc-sections ${link_cref_option})
 
     add_custom_command(TARGET ${target} POST_BUILD
@@ -227,7 +227,7 @@ function(add_elf target ldscript)
     cpp_only(${gen_ldscript} ${ldscript} hal)
     add_executable(${target} ${ARGN})
     set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${out_hex_dir})
-    target_link_libraries(${target} PRIVATE -T $<TARGET_OBJECTS:${gen_ldscript}>)
+    target_link_libraries(${target} PRIVATE "-T$<TARGET_OBJECTS:${gen_ldscript}>")
     target_link_libraries(${target} PRIVATE -Wl,-Map=${target_map_file} -nostdlib -Wl,--gc-sections ${link_cref_option})
 endfunction()
 
@@ -244,7 +244,7 @@ function(add_appimg target ldscript) # <sources> LINK_LIBRARIES <libs>
     add_executable(${target} ${MY_SOURCES})
     set_source_files_properties(${core_stub_o} PROPERTIES GENERATED on)
     set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${out_hex_dir})
-    target_link_libraries(${target} PRIVATE -T $<TARGET_OBJECTS:${gen_ldscript}>)
+    target_link_libraries(${target} PRIVATE "-T$<TARGET_OBJECTS:${gen_ldscript}>")
     target_link_libraries(${target} PRIVATE -Wl,-Map=${target_map_file} -nostdlib -Wl,--gc-sections ${link_cref_option})
     target_link_libraries(${target} PRIVATE ${MY_LINK_LIBRARIES})
 

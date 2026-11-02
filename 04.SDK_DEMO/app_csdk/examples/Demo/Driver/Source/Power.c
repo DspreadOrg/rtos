@@ -144,10 +144,18 @@ short PowerOffOp(int iTimeout)
     parentHeight = lv_obj_get_height(lv_scr_act());
 
     stCtrlObjAttr.m_usWidth = parentWidth;
+#ifdef HW_D30R
+    stCtrlObjAttr.m_usHeight = parentHeight - BAR_HEIGTH;
+#else
     stCtrlObjAttr.m_usHeight = parentHeight;
+#endif
     stCtrlObjAttr.m_align = LV_ALIGN_TOP_LEFT;
     stCtrlObjAttr.m_x = 0;
+#ifdef HW_D30R
+    stCtrlObjAttr.m_y = BAR_HEIGTH;
+#else
     stCtrlObjAttr.m_y = 0;
+#endif
     stCtrlObjAttr.m_stBgAttr.m_ucOpa = LV_OPA_COVER;
     stCtrlObjAttr.m_stBgAttr.m_color = PAGE_BG_COLOR;
     stCtrlObjAttr.m_stBaseDirAttr.m_bIsSet = TRUE;
@@ -171,7 +179,9 @@ short PowerOffOp(int iTimeout)
     stCtrlObjAttr.m_y = parentHeight / 8 * 7;
     Label2 = lv_label_create(BodyObj);
     LvSetCtrlObj(Label2, &stCtrlObjAttr, LV_PART_MAIN | LV_STATE_DEFAULT);
-
+#ifdef HW_D30R
+    LvUiNavBarSetButton(NAV_POS_MID, LV_SYMBOL_POWER, kb_enter_cb);
+#endif
     while (1)
     {
         DispMainTimeSet(0);
@@ -198,6 +208,9 @@ short PowerOffOp(int iTimeout)
                     // Cancel, return
                     DispMainTimeSet(s_timestatus);
                     lv_obj_del(BodyObj);
+#ifdef HW_D30R
+                    LvUiNavBarSetButton(NAV_POS_MID, LV_SYMBOL_LEFT, kb_clear_cb);
+#endif
                     return UI_INPUT_CANCEL;
                 }
             }
@@ -364,10 +377,18 @@ unsigned char ChargerPresence(void)
 short PowerOnProtect(void)
 {
     // Display initialization image and prompt initialization
+#ifdef HW_D30R
+    lv_obj_t *img = lv_label_create(lv_scr_act());
+    lv_label_set_text(img, "RTOS");
+    lv_obj_set_style_text_font(img, Lib_LvglGetFont(70), 0);
+    lv_obj_center(img);
+    lv_obj_set_style_text_opa(img, LV_OPA_COVER, 0);
+#else
     lv_obj_t * img = NULL;
     img = lv_gif_create(lv_scr_act());
     lv_gif_set_src(img, BOOT_GIF);
     lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
+#endif
     //unsigned int ulStartTime = Lib_SysGetTimer();
     while (1)
     {

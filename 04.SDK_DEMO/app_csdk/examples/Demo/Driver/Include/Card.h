@@ -26,11 +26,14 @@
 #define MSC_DETECETED       1       // MAGNETIC STRIPE CARD
 #define SCI_DETECETED	    2       // Contact IC card
 #define NFC_DETECETED	    3       // contactless ic card
+#define NFC_COLLISION       7       // contactless multi-cards conflict
 #define ABORT               4       // cancel
 #define INPUT_CARD_ID	    5       // Manually input card number (only for POS applications)
 #define NO_CARD_ID		    6       // No card required (only for POS applications)
 
 #define  CARD_NONE          0       // No card
+
+#define  LIB_PICC_RET_COLLISION    6
 
 typedef enum {
     ID_CARD_CONTACTLESS = 0,

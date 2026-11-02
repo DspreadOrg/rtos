@@ -223,7 +223,7 @@ void KbOtherQueryOp(void)
 //-----------------------------------------------------------------------------
 void DevFactoryCheck(void)
 {
-#if 1
+#ifndef HW_D30R     // for demo use only
     unsigned int time = Lib_SysGetTimer();
     // First, check hardware status
     while (1)

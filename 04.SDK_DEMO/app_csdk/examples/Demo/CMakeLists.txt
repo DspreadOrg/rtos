@@ -13,38 +13,43 @@ add_definitions("$ENV{MY_PRJ}")
 
 #configure_file(include/mainApp_config.h.in ${BINARY_TOP_DIR}/include/mainApp_config.h)
 
-include_directories(Application/include Driver/include
-                    Middle/include
-                    Lib/include
+include_directories(Application/Include Driver/Include
+                    Middle/Include
+                    Lib/Include
                     Emv
                     EmvNew/include
                     Lvgl
                     Lvgl/porting
                     Lvgl/include/misc
+                    Lvgl/include/extra/widgets/keyboard
                     )
 
 if($ENV{BUILD_TARGET} STREQUAL "A30R")
     message("****************A30R****************")
-    file(GLOB libSDK  lib/libSDK_A30R.a)
-    file(GLOB libCheck  lib/libSelfCheck_A30R.a)
+    file(GLOB libSDK  Lib/libSDK_A30R.a)
+    file(GLOB libCheck  Lib/libSelfCheck_A30R.a)
 
 elseif($ENV{BUILD_TARGET} STREQUAL "D70R")
     message("****************D70R****************")
-    file(GLOB libSDK  lib/libSDK_D70R.a)
-    file(GLOB libCheck  lib/libSelfCheck_D70R.a)
+    file(GLOB libSDK  Lib/libSDK_D70R.a)
+    file(GLOB libCheck  Lib/libSelfCheck_D70R.a)
 elseif($ENV{BUILD_TARGET} STREQUAL "A75R")
     message("****************A75R****************")
-    file(GLOB libSDK  lib/libSDK_A75R.a)
+    file(GLOB libSDK  Lib/libSDK_A75R.a)
+    file(GLOB libCheck  Lib/libSelfCheck_D70R.a)
+elseif($ENV{BUILD_TARGET} STREQUAL "D30R")
+    message("****************D30R****************")
+    file(GLOB libSDK  lib/libSDK_D30R.a)
     file(GLOB libCheck  lib/libSelfCheck_D70R.a)
 else()
     message("********BUILD.BAT ERROR********")
     return()
 endif()
 
-file(GLOB libcJson  lib/libcJson.a)
-file(GLOB libTyTms  lib/libTms.a)
-file(GLOB libtyBat  lib/libBattery.a)
-file(GLOB libLvgl   lib/libLvgl_V8310.a)
+file(GLOB libcJson  Lib/libcJson.a)
+file(GLOB libTms  Lib/libTms.a)
+file(GLOB libBat  Lib/libBattery.a)
+file(GLOB libLvgl   Lib/libLvgl_V8310.a)
 File(GLOB EMVNEW_LIB_FILES ${CMAKE_CURRENT_SOURCE_DIR}/EmvNew/lib/*.a)
 if(CONFIG_APPIMG_LOAD_FLASH)
     set(target mainapp_flash)
@@ -56,7 +61,7 @@ if(CONFIG_APPIMG_LOAD_FLASH)
                        Lvgl/porting/*.c)
                         
     add_appimg(${target} ${mainapp_flash_ldscript} ${MAINSRC})
-    target_link_libraries(${target} PRIVATE ${libCheck} ${libLvgl} ${libSDK} ${libtyEmvKernel} ${libcJson} ${libTyTms} ${libtyBat} ${libm_file_name} ${libc_file_name} ${libgcc_file_name} 
+    target_link_libraries(${target} PRIVATE ${libCheck} ${libLvgl} ${libSDK} ${libtyEmvKernel} ${libcJson} ${libTms} ${libBat} ${libm_file_name} ${libc_file_name} ${libgcc_file_name} 
     -Wl,--start-group
     ${EMVNEW_LIB_FILES}
     -Wl,--end-group

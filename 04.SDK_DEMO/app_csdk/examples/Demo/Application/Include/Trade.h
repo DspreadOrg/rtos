@@ -34,6 +34,10 @@
 #define  u8   unsigned char
 #undef U8
 
+#undef pu8
+#define  pu8   unsigned char *
+#undef PU8
+
 #undef s8
 #undef S8
 
@@ -48,6 +52,10 @@
 #undef u32
 #define  u32  unsigned int
 #undef U32
+
+#undef pu32
+#define  pu32   unsigned int *
+#undef PU32
 
 #undef s32
 #define  s32    int
@@ -230,6 +238,10 @@ typedef struct
 //transaction recode will be stored in DB
 typedef struct
 {
+    char trans_type;
+    short cardDetectType;
+    unsigned char trans_time[6+1];		/*trans time*/
+    unsigned char trans_amount[12+1];
     ST_CARDINFO stCardInfo;                 // card info
     ST_EMVINFO stEmvInfo;                   // EMV info
     ST_TRANSINFO stTransInfo;               // MSG info

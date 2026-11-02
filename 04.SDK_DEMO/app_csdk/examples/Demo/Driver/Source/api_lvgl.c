@@ -19,6 +19,7 @@
 #include "Menu.h"
 #include "Idle.h"
 #include "lv_port_indev.h"
+#include "lv_keyboard.h"
 
 #define STATUS_BAR_HEIGHT               gStatusBarHeight
 
@@ -68,6 +69,7 @@ typedef struct
 static lv_obj_t *gScrObj = NULL;
 static lv_obj_t *gStatusBarObj = NULL;
 static lv_obj_t *gPageBodyObj = NULL;
+static lv_obj_t *gNavBarObj = NULL;
 
 static t_lvgl_button *gButtonItems[MAX_BUTTON_PAGE] = { NULL };
 static lv_obj_t *gTimeLabel = NULL;
@@ -81,7 +83,7 @@ static int gHasStatusBar = 0;
 static int gHasStatusBarIcon = 0;
 static lv_obj_t *gUserStatusBarIcon[MAX_USER_STATUSBAR_ICON] = { 0 };
 static status_bar_cb gStatusBarCb = NULL;
-static unsigned int gStatusBarHeight = 30;
+static unsigned int gStatusBarHeight = BAR_HEIGTH;
 
 lv_obj_t* gTextList[8] = { 0 };
 
@@ -632,7 +634,7 @@ void LvUiCreateStatusBar()
     //Start the task
     if (gTimeTask)
     {
-        lv_timer_del (gTimeTask);
+        lv_timer_del(gTimeTask);
         gTimeTask = NULL;
     }
     gTimeTask = lv_timer_create(LvUiStatusBarTask, 1000, &userData);
@@ -656,7 +658,11 @@ static void LvUiCreateMenuBody(void)
     lv_obj_remove_style_all(gPageBodyObj);
 
     stCtrlObjAttr.m_usWidth = lv_obj_get_width (gScrObj);
+#ifdef HW_D30R
+    stCtrlObjAttr.m_usHeight = lv_obj_get_height(gScrObj) - (0 == gHasStatusBar ? 0 : STATUS_BAR_HEIGHT) - NAV_BAR_HEIGTH;
+#else
     stCtrlObjAttr.m_usHeight = lv_obj_get_height(gScrObj) - (0 == gHasStatusBar ? 0 : STATUS_BAR_HEIGHT);
+#endif
     stCtrlObjAttr.m_align = LV_ALIGN_TOP_LEFT;
     stCtrlObjAttr.m_x = 0;
     stCtrlObjAttr.m_y = (0 == gHasStatusBar ? 0 : STATUS_BAR_HEIGHT);
@@ -731,8 +737,9 @@ int LvUiInit()
     LvUiCtrlStatusBar(0);
     // main menu
     LvUiCreateMenuBody();
-
-    //
+#ifdef HW_D30R
+    LvUiCreateNavBar();
+#endif
     Lib_LvglLock(1);
 
     //LvUiLoadStatusBarIcon();
@@ -743,8 +750,15 @@ int LvUiInit()
     return LVGL_OPER_SUCC;
 }
 
+void LvUiRefreshStatusBar(void)
+{
+    lv_obj_set_style_bg_color(gStatusBarObj, (lv_color_t)DEFAULT_FORG_COLOR, LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_invalidate(gStatusBarObj);
+}
+
 void LvUiCtrlStatusBar(int status)
 {
+#ifndef HW_D30R
     if (status)
     {
         unsigned short w, h, font, forecolor, backcolor;
@@ -756,6 +770,7 @@ void LvUiCtrlStatusBar(int status)
     {
         gHasStatusBar = 0;
     }
+#endif
 }
 
 void LvUiResetStatusBarIcons(int status)
@@ -1287,11 +1302,123 @@ int LvUiShowImage(int x, int y, t_lvgl_image *img, int id)
     return LVGL_OPER_FAIL;
 }
 
+void kb_enter_cb(lv_event_t * e)
+{
+    gBtnSelected = KB_ENTER;
+    BeepOn();
+}
+
+static void kb_cancel_cb(lv_event_t * e)
+{
+    gBtnSelected = KB_CANCEL;
+    BeepOn();
+}
+
+static void kb_up_cb(lv_event_t * e)
+{
+    gBtnSelected = KB_UP;
+    BeepOn();
+}
+
+static void kb_down_cb(lv_event_t * e)
+{
+    gBtnSelected = KB_DOWN;
+    BeepOn();
+}
+
+void kb_clear_cb(lv_event_t * e)
+{
+    gBtnSelected = KB_CLEAR;
+    BeepOn();
+}
 
 int LvUiInputText(lv_obj_t* ta, int mode, int min, int max, int timeout)
 {
     unsigned int tick = 0;
     int ret = 0, size = 0;
+
+#ifdef HW_D30R
+    lv_obj_t *kb = lv_keyboard_create(lv_layer_top());
+    lv_keyboard_set_textarea(kb, ta);
+    lv_keyboard_set_mode(kb, LV_KEYBOARD_MODE_TEXT_LOWER);
+    lv_obj_set_size(kb, LV_PCT(100), LV_PCT(50));
+    lv_obj_align(kb, LV_ALIGN_BOTTOM_MID, 0, 0);
+
+    lv_obj_set_style_bg_opa(kb, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(kb, lv_color_white(), LV_PART_MAIN);
+
+    lv_obj_add_event_cb(kb, kb_enter_cb, LV_EVENT_READY, NULL);
+    lv_obj_add_event_cb(kb, kb_cancel_cb, LV_EVENT_CANCEL, NULL);
+
+    gKeyPressed = -1;
+    gBtnSelected = -1;
+    tick = Lib_SysGetTimer();
+    while (1)
+    {
+        Lib_LvglTask();
+
+        // Hibernate the device
+        DeviceSleepProcess();
+
+        //other key query service
+        KbOtherQueryOp();
+
+        if ((Lib_SysGetTimer() - tick) >= (unsigned int)timeout)
+        {
+            ret = LVGL_OPER_TIMEOUT;
+            break;
+        }
+        if (gKeyPressed <= 0 && gBtnSelected <= 0)
+        {
+            continue;
+        }
+        Lib_LvglLock(1);
+        const char *text = lv_textarea_get_text(ta);
+        Lib_LvglLock(0);
+        size = strlen(text);
+
+        if (gKeyPressed == KB_CANCEL || gBtnSelected == KB_CANCEL)
+        {
+            ret = LVGL_OPER_CANCEL;
+            break;
+        }
+        else if (gKeyPressed == KB_ENTER || gBtnSelected == KB_ENTER)
+        {
+            if (mode == LVGL_INPUT_MODE_AMOUNT)
+            {
+#if 0
+                size = strlen(buf);
+                if (size)
+                {
+                    sprintf(buf, "%lld", amount);
+                }
+                if (size >= min && size <= max)
+                {
+                    Lib_LvglLock(1);
+                    lv_textarea_set_text(ta, buf);
+                    Lib_LvglLock(0);
+                    break;
+                }
+#endif
+            }
+            else if (size >= min && size <= max)
+            {
+                ret = LVGL_OPER_SUCC;
+                break;
+            }
+        }
+
+        gKeyPressed = -1;
+        gBtnSelected = -1;
+
+    }
+
+    gKeyPressed = -1;
+    gBtnSelected = -1;
+    lv_obj_del(kb);
+
+    return ret;
+#else
     char buf[32 + 1] = { 0 };
     long long amount = 0;
     int keyCharSwitch = 0;
@@ -1460,6 +1587,7 @@ int LvUiInputText(lv_obj_t* ta, int mode, int min, int max, int timeout)
     //LvUiSetCb ( gPageBodyObj, LvUiKeyCb, LV_EVENT_KEY, NULL );
 
     return ret;
+#endif
 }
 
 lv_obj_t* LvUiCreateInputTextBody(int font, char* title, char* msg)
@@ -1481,7 +1609,11 @@ lv_obj_t* LvUiCreateInputTextBody(int font, char* title, char* msg)
 
     //set body
     stCtrlObjAttr.m_usWidth = parentWidth;
+#ifdef HW_D30R
+    stCtrlObjAttr.m_usHeight = parentHeight / 2;
+#else
     stCtrlObjAttr.m_usHeight = parentHeight;
+#endif
     stCtrlObjAttr.m_stBgAttr.m_ucOpa = LV_OPA_100;
     stCtrlObjAttr.m_stBgAttr.m_color = LV_COLOR_WHITE;
     LvSetCtrlObj(body, &stCtrlObjAttr, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -2246,6 +2378,43 @@ int LvUiDate(char *Date, char *title, int iTimeout)
     return ret;
 }
 
+void kb_value_changed_cb(lv_event_t * e)
+{
+    lv_obj_t * kb = lv_event_get_target(e);
+
+    uint32_t btn_id = lv_btnmatrix_get_selected_btn(kb);
+    if (btn_id == LV_BTNMATRIX_BTN_NONE) return;
+
+    const char * txt = lv_btnmatrix_get_btn_text(kb, btn_id);
+    if (txt)
+    {
+        if (txt[0] >= KB_DIGIT_ZERO && txt[0] <= KB_DIGIT_NINE)
+        {
+            gBtnSelected = txt[0];
+        }
+        else if (strcmp(txt, LV_SYMBOL_OK) == 0)
+        {
+            gBtnSelected = KB_ENTER;
+        }
+        else if (strcmp(txt, LV_SYMBOL_BACKSPACE) == 0)
+        {
+            gBtnSelected = KB_CLEAR;
+        }
+        else if (strcmp(txt, LV_SYMBOL_KEYBOARD) == 0)
+        {
+            gBtnSelected = KB_CANCEL;
+        }
+        else if (strcmp(txt, LV_SYMBOL_LEFT) == 0)
+        {
+            gBtnSelected = KB_UP;
+        }
+        else if (strcmp(txt, LV_SYMBOL_RIGHT) == 0)
+        {
+            gBtnSelected = KB_DOWN;
+        }
+    }
+}
+
 int LvUiInputAmt(char* str_amt, int max, int timeout)
 {
     int ret = 0;
@@ -2360,15 +2529,26 @@ int LvUiInputAmt(char* str_amt, int max, int timeout)
     lv_obj_add_flag(textArea, LV_OBJ_FLAG_EVENT_BUBBLE);
     lv_obj_add_flag(titleLabel, LV_OBJ_FLAG_EVENT_BUBBLE);
     lv_obj_add_flag(image, LV_OBJ_FLAG_EVENT_BUBBLE);
+#ifdef HW_D30R
+    lv_obj_t *kb = lv_keyboard_create(body);
 
+    lv_keyboard_set_mode(kb, LV_KEYBOARD_MODE_NUMBER);
+    lv_obj_set_size(kb, LV_PCT(100), LV_PCT(50));
+    lv_obj_align(kb, LV_ALIGN_BOTTOM_MID, 0, 0);
+
+    lv_obj_set_style_bg_opa(kb, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(kb, lv_color_white(), LV_PART_MAIN);
+
+    lv_obj_add_event_cb(kb, kb_value_changed_cb, LV_EVENT_VALUE_CHANGED, NULL);
+#endif
     int key = 0, size = 0;
     char buf[32 + 1] = { 0 };
     long long amount = 0;
     unsigned int tick = 0;
     tick = Lib_SysGetTimer();
-    while(1)
+    while (1)
     {
-        if((Lib_SysGetTimer() - tick) / 1000 >= (unsigned int)timeout)
+        if ((Lib_SysGetTimer() - tick) / 1000 >= (unsigned int)timeout)
         {
             ret = LVGL_OPER_TIMEOUT;
             break;
@@ -2432,7 +2612,7 @@ int LvUiInputAmt(char* str_amt, int max, int timeout)
     }
 
     Lib_LvglLock(1);
-    lv_obj_del (body);
+    lv_obj_del(body);
     Lib_LvglLock(0);
 
     return ret;
@@ -2555,7 +2735,11 @@ void LvUiSwitchEventHandler(lv_event_t *e)
     switch (code)
     {
     case LV_EVENT_CLICKED:
+#ifdef HW_D30R
+        gBtnSelected = KB_ENTER;
+#else
         gKeyPressed = KB_ENTER;
+#endif
         *userData = TRUE;
         BeepOn();
         break;
@@ -2593,7 +2777,9 @@ int LvUiSwitch(char *title, int iTimeout, unsigned char ucParamId, char *imgOnSr
     sw = lv_switch_create(container);
     imgOn = lv_img_create(container);
     imgOff = lv_img_create(container);
-
+#ifdef HW_D30R
+    LvUiCreatebtn(gPageBodyObj);
+#endif
     //set label style
     stCtrlObjAttr.m_stTextAttr.m_pcTextContent = title;
     stCtrlObjAttr.m_stTextAttr.m_textLongMode = LV_LABEL_LONG_WRAP;
@@ -2614,8 +2800,13 @@ int LvUiSwitch(char *title, int iTimeout, unsigned char ucParamId, char *imgOnSr
     memset((char*)&stCtrlObjAttr, 0x00, sizeof(stCtrlObjAttr));
     stCtrlObjAttr.m_align = LV_ALIGN_CENTER;
     stCtrlObjAttr.m_y = parentHeight / 12;
+#ifdef HW_D30R
+    stCtrlObjAttr.m_usWidth = parentWidth / 12 * 7;
+    stCtrlObjAttr.m_usHeight = parentWidth / 12 * 7;
+#else
     stCtrlObjAttr.m_usWidth = parentHeight / 12 * 7;
     stCtrlObjAttr.m_usHeight = parentHeight / 12 * 7;
+#endif
     stCtrlObjAttr.m_stBorderAttr.m_usWidth = 1;
     stCtrlObjAttr.m_stBorderAttr.m_ucOpa = LV_OPA_40;
     stCtrlObjAttr.m_stBorderAttr.m_color = LV_COLOR_BLACK;
@@ -2734,7 +2925,11 @@ void LvUilistButEventhandler(lv_event_t *e)
     case LV_EVENT_CLICKED:
         if (keyPressed)
         {
+#ifdef HW_D30R
+            gBtnSelected = keyPressed;
+#else
             gKeyPressed = keyPressed;
+#endif
         }
         BeepOn();
         break;
@@ -2787,6 +2982,12 @@ void msgbox_event_handler(lv_event_t *event)
             //lv_msgbox_close(mbox);
         }
     }
+#ifdef HW_D30R
+    else if (code == LV_EVENT_CLICKED)
+    {
+        gBtnSelected = KB_ENTER;
+    }
+#endif
 }
 
 int LvUiMessageBox(char* pcDisp, unsigned int uiType, char *title, int iTimeDly)
@@ -2820,7 +3021,11 @@ int LvUiMessageBox(char* pcDisp, unsigned int uiType, char *title, int iTimeDly)
 
     stCtrlObjAttr.m_align = LV_ALIGN_CENTER;
     stCtrlObjAttr.m_usWidth = parentWidth - parentWidth / 3;
+#ifdef HW_D30R
+    stCtrlObjAttr.m_usHeight = parentHeight / 3;
+#else
     stCtrlObjAttr.m_usHeight = parentHeight - parentHeight / 3;
+#endif
     stCtrlObjAttr.m_stBgAttr.m_color = LV_COLOR_WHITE;
     stCtrlObjAttr.m_stBgAttr.m_ucOpa = LV_OPA_100;
     stCtrlObjAttr.m_stBorderAttr.m_usWidth = 6;
@@ -3368,5 +3573,158 @@ void LvSetStyle(lv_style_t* pstStyleObj, LV_STYLE_ATTR* pstStyleAttr)
 
     lv_style_set_bg_opa(pstStyleObj, pstStyleAttr->m_stBgAttr.m_ucOpa);
     lv_style_set_bg_color(pstStyleObj, pstStyleAttr->m_stBgAttr.m_color);
+}
+
+lv_obj_t* LvUiCreateInputKeyboard(lv_obj_t *body, lv_keyboard_mode_t mode)
+{
+    lv_obj_t *kb = NULL;
+
+    if (body == NULL)
+        kb = lv_keyboard_create(lv_layer_top());
+    else
+        kb = lv_keyboard_create(body);
+    lv_keyboard_set_mode(kb, mode);
+    lv_obj_set_size(kb, LV_PCT(100), LV_PCT(50));
+    lv_obj_align(kb, LV_ALIGN_BOTTOM_MID, 0, 0);
+
+    lv_obj_set_style_bg_opa(kb, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(kb, lv_color_white(), LV_PART_MAIN);
+
+    lv_obj_add_event_cb(kb, kb_value_changed_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    return kb;
+}
+
+void LvUiCreatebtn(lv_obj_t *body)
+{
+    lv_obj_t *btnCancel = NULL;
+    lv_obj_t *btnOk = NULL;
+    CTRL_OBJ_ATTR stCtrlObjAttr = {0};
+    int parentWidth, parentHeight;
+
+    if (body == NULL)
+    {
+        return;
+    }
+
+    parentWidth = lv_obj_get_width(body);
+    parentHeight = lv_obj_get_height(body);
+
+    btnCancel = lv_btn_create(body);
+    btnOk = lv_btn_create(body);
+
+    memset((char*)&stCtrlObjAttr, 0x00, sizeof(stCtrlObjAttr));
+    stCtrlObjAttr.m_align = LV_ALIGN_TOP_LEFT;
+    stCtrlObjAttr.m_x = parentWidth / 20;
+    stCtrlObjAttr.m_y = 0;
+    stCtrlObjAttr.m_usWidth = parentWidth / 5;
+    stCtrlObjAttr.m_usHeight = parentHeight / 12;
+    LvSetCtrlObj(btnCancel, &stCtrlObjAttr, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_t *labelCancel = lv_label_create(btnCancel);
+    lv_label_set_text(labelCancel, LV_SYMBOL_CLOSE);
+    lv_obj_center(labelCancel);
+
+    memset((char*)&stCtrlObjAttr, 0x00, sizeof(stCtrlObjAttr));
+    stCtrlObjAttr.m_align = LV_ALIGN_TOP_RIGHT;
+    stCtrlObjAttr.m_x = -parentWidth / 20;
+    stCtrlObjAttr.m_y = 0;
+    stCtrlObjAttr.m_usWidth = parentWidth / 5;
+    stCtrlObjAttr.m_usHeight = parentHeight / 12;
+    LvSetCtrlObj(btnOk, &stCtrlObjAttr, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_t *labelOk = lv_label_create(btnOk);
+    lv_label_set_text(labelOk, LV_SYMBOL_OK);
+    lv_obj_center(labelOk);
+
+    lv_obj_add_event_cb(btnCancel, kb_cancel_cb, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(btnOk, kb_enter_cb, LV_EVENT_CLICKED, NULL);
+}
+
+static void apply_glass_style(lv_obj_t *btn)
+{
+    lv_obj_set_style_bg_color(btn, lv_color_white(), 0);
+    lv_obj_set_style_bg_opa(btn, LV_OPA_40, 0);
+
+    lv_obj_set_style_bg_grad_color(btn, lv_color_hex(0xCCCCCC), 0);
+    lv_obj_set_style_bg_grad_dir(btn, LV_GRAD_DIR_VER, 0);
+
+    lv_obj_set_style_border_width(btn, 1, 0);
+    lv_obj_set_style_border_color(btn, lv_color_white(), 0);
+    lv_obj_set_style_border_opa(btn, LV_OPA_60, 0);
+
+    lv_obj_set_style_shadow_width(btn, 8, 0);
+    lv_obj_set_style_shadow_color(btn, lv_color_black(), 0);
+    lv_obj_set_style_shadow_opa(btn, LV_OPA_20, 0);
+    lv_obj_set_style_shadow_ofs_y(btn, 2, 0);
+
+    lv_obj_set_style_radius(btn, 12, 0);
+    lv_obj_set_style_pad_all(btn, 4, 0);
+}
+
+void LvUiCreateNavBar(void)
+{
+    gNavBarObj = lv_obj_create(lv_layer_top());
+    lv_obj_set_size(gNavBarObj, LV_PCT(100), NAV_BAR_HEIGTH);
+    lv_obj_align(gNavBarObj, LV_ALIGN_BOTTOM_MID, 0, 0);
+    lv_obj_set_style_bg_opa(gNavBarObj, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(gNavBarObj, 0, 0);
+    lv_obj_set_style_pad_all(gNavBarObj, 0, 0);
+    lv_obj_clear_flag(gNavBarObj, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t *btn_left  = lv_btn_create(gNavBarObj);
+    lv_obj_t *btn_mid   = lv_btn_create(gNavBarObj);
+    lv_obj_t *btn_right = lv_btn_create(gNavBarObj);
+
+    lv_obj_set_size(btn_left,   lv_pct(30), 50);
+    lv_obj_set_size(btn_mid,    lv_pct(30), 50);
+    lv_obj_set_size(btn_right,  lv_pct(30), 50);
+
+    lv_obj_align(btn_left,  LV_ALIGN_LEFT_MID,   10, 0);
+    lv_obj_align(btn_mid,   LV_ALIGN_CENTER,     0, 0);
+    lv_obj_align(btn_right, LV_ALIGN_RIGHT_MID, -10, 0);
+
+    apply_glass_style(btn_left);
+    apply_glass_style(btn_mid);
+    apply_glass_style(btn_right);
+
+    lv_obj_t *lbl_left  = lv_label_create(btn_left);
+    lv_label_set_text(lbl_left, LV_SYMBOL_CLOSE);
+    lv_obj_center(lbl_left);
+
+    lv_obj_t *lbl_mid   = lv_label_create(btn_mid);
+    lv_label_set_text(lbl_mid, LV_SYMBOL_LEFT);
+    lv_obj_center(lbl_mid);
+
+    lv_obj_t *lbl_right = lv_label_create(btn_right);
+    lv_label_set_text(lbl_right, LV_SYMBOL_DOWN);
+    lv_obj_center(lbl_right);
+
+    lv_obj_add_event_cb(btn_left,   kb_cancel_cb,   LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(btn_mid,    kb_clear_cb,    LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(btn_right,  kb_down_cb,     LV_EVENT_CLICKED, NULL);
+
+}
+
+void LvUiNavBarSetButton(nav_pos_t pos, const char *text, lv_event_cb_t cb)
+{
+    if (pos >= NAV_BAR_BTN_COUNT) return;
+
+    if (gNavBarObj == NULL) return;
+
+    lv_obj_t *btn = lv_obj_get_child(gNavBarObj, pos);
+    if (!btn) return;
+
+    lv_obj_t *lbl = lv_obj_get_child(btn, 0);
+    if (text && lbl)
+    {
+        lv_label_set_text(lbl, text);
+    }
+
+    lv_obj_remove_event_cb_with_user_data(btn, NULL, NULL);
+    if (cb)
+    {
+        lv_obj_add_event_cb(btn, cb, LV_EVENT_CLICKED, NULL);
+    }
 }
 

@@ -153,8 +153,6 @@ short UIOnlineTrade(int iTimeout, unsigned long ulOpCode)
 {
     short sRC;
     unsigned char aucAmount[12+1] = { 0 };
-    LVGL_RESULT result = { 0 };
-    unsigned char aucTemp[40],aucBuf[128];
 
     FUN_IN;
 
@@ -189,61 +187,16 @@ short UIOnlineTrade(int iTimeout, unsigned long ulOpCode)
         return sRC;
     }
 
-    // Set server
-    //SetServerOpt(SERVER_OPT_POSP_MAIN);
-    // Transaction message sending
-	sRC = CupOpTx8583Pack(OnlineTradeSetSendData, ulOpCode, iTimeout);
-	if (RET_OK != sRC)
-	{
-        Lib_IccClose(ICC_SLOT_EMV_IC);
-		return sRC;
-	}
-
-    // Receive and process transaction messages
-    sRC = CupOpRx8583Pack(iTimeout, ulOpCode, OnlineTradeDealRecvData);
-    Lib_IccClose(ICC_SLOT_EMV_IC);
-    if (RET_OK != sRC)
+    if(sRC == RET_OK)
     {
-        // Is it necessary to reversal immediately
-        IsFastRevert(iTimeout, ulOpCode);
-        return sRC;
+    // Add transaction records
+	    ApiAddRec(&g_trade_info);
+    // Press the key to exit
+    #if HW_TPH
+        PrintReceipt();
+    #endif
     }
 
-    // Result processing after successful transaction
-    CupOpResultDeal(ulOpCode, iTimeout);
-
-    // Right aligned amount becomes a 6-byte BCD
-    memset(aucTemp, 0, sizeof(aucTemp));
-    SetCash(aucAmount, strlen((const char *)aucAmount), aucTemp);
-    memcpy(g_trade_info.aucSum, aucTemp, 6);
-
-    // Display transaction amount
-    memset(aucTemp, 0, sizeof(aucTemp));
-    memset(aucBuf, 0, sizeof(aucBuf));
-    memcpy(aucBuf, g_trade_info.aucSum, 6);
-    BcdSum2AscSum(aucBuf, (char*)aucTemp);
-    memset(aucBuf, 0, sizeof(aucBuf));
-#if HW_TPH
-    sprintf((char *)aucBuf, "%s\n%s%s $\n%s",TIP_TRADE_OK, TIP_AMOUNT, aucTemp, TIP_PRINTING);
-#else
-    sprintf((char *)aucBuf, "%s\n%s%s $",TIP_TRADE_OK, TIP_AMOUNT, aucTemp);
-    result.timeout = 3000;
-#endif
-    result.img = SUCCESS_IMG;
-    result.title = TIP_SUCCESS;
-    result.msg = (char *)aucBuf;
-    result.fontColor = LV_COLOR_GREEN;
-
-    // Add transaction records
-	ApiAddRec(&g_trade_info);
-
-    LvUiShowResult(&result);
-
-	//AudioPlay(AUDIO_STR_AND_AMOUNT, (unsigned char *)aucTemp);
-    // Press the key to exit
-#if HW_TPH
-	PrintReceipt();
-#endif
 	return sRC;
 }
 

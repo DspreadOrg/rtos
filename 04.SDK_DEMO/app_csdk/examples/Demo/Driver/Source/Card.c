@@ -11,7 +11,7 @@
 #include "Trade.h"
 #include "Common.h"
 #include "Idle.h"
-#include "key.h"
+#include "Key.h"
 
 #define CONTACT					0
 #define CONTACTLESS				1
@@ -83,7 +83,13 @@ short CheckCardForTradeInDefaultUI(void)
         }
     }
 
-    if (CARD_NONE < Lib_PiccInquiry( NULL, NULL, NULL, NULL))
+    ret = Lib_PiccInquiry( NULL, NULL, NULL, NULL);
+    if (LIB_PICC_RET_COLLISION == ret)
+    {
+        TRACE("Lib_PiccInquiry multi-cards conflict");
+        ucTemp = NFC_COLLISION;
+    }
+    else if (CARD_NONE < ret)
     {
         TRACE("Lib_PiccInquiry2 OK");
         BeepOn();
@@ -183,7 +189,14 @@ short OpenCiCard(int iTimeout, unsigned char ucInputCardIdEnable, unsigned char 
 		// Supports contact-less cards
 		if (ucCardBit & BIT1)
 		{
-			if (CARD_NONE < Lib_PiccInquiry( NULL, NULL, NULL, NULL))
+			ret = Lib_PiccInquiry( NULL, NULL, NULL, NULL);
+            if (LIB_PICC_RET_COLLISION == ret)
+            {
+                TRACE("Lib_PiccInquiry multi-cards conflict");
+                sRC = NFC_COLLISION;
+                break;
+            }
+            if (CARD_NONE < ret)
             {
                 TRACE("Lib_PiccInquiry OK");
                 BeepOn();

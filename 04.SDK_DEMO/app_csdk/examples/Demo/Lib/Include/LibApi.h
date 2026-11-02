@@ -23,7 +23,6 @@
 #include "LibTouch.h"
 #include "LibWifi.h"
 #include "LibGprs.h"
-#include "LibDukpt.h"
 #include "LibCharConvert.h"
 #include "LibcJSON.h"
 #include "Libmxml.h"

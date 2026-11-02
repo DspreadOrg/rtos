@@ -3,6 +3,14 @@
 
 #include "lvgl.h"
 
+typedef enum
+{
+    NAV_POS_LEFT = 0,
+    NAV_POS_MID,
+    NAV_POS_RIGHT,
+    NAV_BAR_BTN_COUNT,
+} nav_pos_t;
+
 #define PAGE_BG_COLOR                   lv_color_hex(0xFFFFFF)
 
 #define LV_COLOR_WHITE                  lv_color_hex(0xFFFFFF)
@@ -24,9 +32,15 @@
 #define LV_COLOR_PURPLE                 lv_color_hex(0x800080)
 #define LV_COLOR_ORANGE                 lv_color_hex(0xFFA500)
 
+#ifdef HW_D30R
+#define FONT_SIZE_NORMAL                                    30
+#define FONT_SIZE_SMALL                                     24
+#define FONT_SIZE_TIP                                       20
+#else
 #define FONT_SIZE_NORMAL                                    22
 #define FONT_SIZE_SMALL                                     18
 #define FONT_SIZE_TIP                                       14
+#endif
 
 #define FONT_SIZE_STATUSBAR_TIME                            18
 #define FONT_SIZE_TRANSACTION_AMOUNT                        28
@@ -37,7 +51,7 @@
 #define FONT_SIZE_TIMER_TIME                                24
 #define FONT_SIZE_TRANSACTION_DETAILS_IMFORMATION           18
 #define FONT_SIZE_TRANSACTION_DETAILS_AMOUNT                26
-#define FONT_SIZE_TEXT_INPUT_TITLE                          22
+#define FONT_SIZE_TEXT_INPUT_TITLE                          FONT_SIZE_NORMAL
 #define FONT_SIZE_TEXT_INPUT_IMFORMATION                    18
 #define FONT_SIZE_TEXT_INPUT                                18
 #define FONT_SIZE_MENU_PACK_Y                               20
@@ -136,6 +150,10 @@ LIB_EXPORT int LvUiShowResult(LVGL_RESULT *pResult);
 LIB_EXPORT void LvUiCreateStatusBarTask(status_bar_cb task_cb);
 LIB_EXPORT int LvUiSetStatusBarIcon(int x, char* iconname, int group);
 LIB_EXPORT void LvUiSetStatusBar(int height, lv_color_t bgColor);
+LIB_EXPORT void LvUiRefreshStatusBar(void);
+LIB_EXPORT lv_obj_t* LvUiCreateInputKeyboard(lv_obj_t *body, lv_keyboard_mode_t mode);
+LIB_EXPORT void LvUiCreatebtn(lv_obj_t *body);
+LIB_EXPORT void LvUiNavBarSetButton(nav_pos_t pos, const char *text, lv_event_cb_t cb);
 LIB_EXPORT unsigned int LvUiGetStatusBarHeight(void);
 LIB_EXPORT int LvUiInputAmt(char* str_amt, int max, int timeout);
 LIB_EXPORT lv_obj_t* LvUiCreateInputTextBody(int font, char* title, char* msg);
@@ -157,5 +175,9 @@ extern void LvUiFunctionRegisterToSdk(void);
 extern int LvUiMessageBox(char* pcDisp, unsigned int uiType, char *title, int iTimeDly);
 extern void LvUiShowUiMenuPackY(char *pText, char **ppcMenuInfo, unsigned char ucTotalLines, unsigned char ucHighlightIndex, unsigned char isPicture);
 extern unsigned char LvGetKey(void);
+
+extern void kb_enter_cb(lv_event_t * e);
+extern void kb_clear_cb(lv_event_t * e);
+
 #endif
 

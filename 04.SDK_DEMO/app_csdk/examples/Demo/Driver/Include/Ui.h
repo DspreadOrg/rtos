@@ -16,8 +16,9 @@
 //---------------------------------------------------------------------------
 
 // LCD resolution
-#define LCD_MAX_SEG                     320
-#define LCD_MAX_COM                     240
+#define LCD_MAX_SEG                     LV_HOR_RES_MAX
+#define LCD_MAX_COM                     LV_VER_RES_MAX
+
 #define LCD_W                           LCD_MAX_SEG
 #define LCD_H                           LCD_MAX_COM
 
@@ -32,9 +33,14 @@
 #define LCD_LINE_CHAR_ML                20
 // The height displayed in the first line status bar
 #define BAR_HEIGTH                      30
-// Display height for each row
-#define LINE_HEIGTH                     30
 
+#define NAV_BAR_HEIGTH                  54
+// Display height for each row
+#ifdef HW_D30R
+#define LINE_HEIGTH                     60
+#else
+#define LINE_HEIGTH                     30
+#endif
 
 // Maximum number of supported rows
 #define MAX_COM_LINES                   ((LCD_H-BAR_HEIGTH)/LINE_HEIGTH)	//7
@@ -216,7 +222,11 @@ typedef struct
 #define CONNECT_WIFI_ICON               CON_LETTER(connect_wifi.png)
 #define APP_DOWNLOAD_IMG                CON_LETTER(appdownload.png)
 #define ICON_LOGIN                      CON_LETTER(login.png)
+#ifdef HW_D30R
+#define TITLE_BG_IMG                    CON_LETTER(title_bg_480.png)
+#else
 #define TITLE_BG_IMG                    CON_LETTER(title_bg.png)
+#endif
 #define WIFI0_ICON                      CON_LETTER(wifi0.png)
 #define WIFI1_ICON                      CON_LETTER(wifi1.png)
 #define WIFI2_ICON                      CON_LETTER(wifi2.png)
@@ -256,9 +266,15 @@ typedef struct
 #define PRINT_ICON                      CON_LETTER(Print.png)
 #define FILESYSTEM_ICON                 CON_LETTER(FileSystem.png)
 #define LAYERDEMO_ICON                  CON_LETTER(LayerDemo.png)
+#ifdef HW_D30R
+#define MENU_STYLE2_ICON                CON_LETTER(menu_s2_480.png)
+#define MENU_STYLE2_BG0_ICON            CON_LETTER(menu_s2_bg0_480.png)
+#define MENU_STYLE2_BG1_ICON            CON_LETTER(menu_s2_bg1_480.png)
+#else
 #define MENU_STYLE2_ICON                CON_LETTER(menu_s2.png)
 #define MENU_STYLE2_BG0_ICON            CON_LETTER(menu_s2_bg0.png)
 #define MENU_STYLE2_BG1_ICON            CON_LETTER(menu_s2_bg1.png)
+#endif
 #define ENTERAMT_ICON                   CON_LETTER(enter_amt_bg.png)
 #define ICC_GIF                         CON_LETTER(Icc.gif)
 #define LOAD_DATA_GIF                   CON_LETTER(loaddata.gif)

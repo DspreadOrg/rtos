@@ -58,6 +58,7 @@
 int Lib_PrintStr(unsigned char ucMode, unsigned char *pucBuf, unsigned long uiLen);
 int PrintBmp(unsigned short usStartX, char *pscFileName);
 int PrintReceipt(void);
+int PrintTest(void);
 
 #endif
 

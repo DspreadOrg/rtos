@@ -8,7 +8,7 @@
 
 #include "Language.h"
 #include "Battery.h"
-#include "power.h"
+#include "Power.h"
 #include "Ui.h"
 #include "Drv.h"
 #include "Common.h"

@@ -7,7 +7,7 @@
  **********************************************************************************************************/
 #include "Print.h"
 #include "Language.h"
-#include "LibSysApi.h"
+#include "LibSysapi.h"
 #include "Drv.h"
 #include "Trade.h"
 #include "Common.h"
@@ -184,6 +184,165 @@ Again:
     {
         return iRc;
     }
+
+    // Turn off the printer when printing is complete
+    iRc = Lib_PrnClose();
+    if (iRc == RET_ERR_TPH_NO_PAPER)
+    {
+        char aucDispBuffer[128] = {0};
+
+        memset(aucDispBuffer, 0x00, sizeof(aucDispBuffer));
+        sprintf((char *)aucDispBuffer, "%s\n %s",TIP_PRN_PAPER_OUT, TIP_PRN_PAPER_ADD);
+        iRc = MessageBox(aucDispBuffer, MB_COLOR_YELLOW |MB_CENTER | MB_ICONQUESTION, 60000);
+        if (iRc == KB_ENTER)
+        {
+            LvUiMessageBox(TIP_PRINTING, MB_COLOR_YELLOW |MB_CENTER | MB_ICONQUESTION, NULL, 500);
+            Lib_PrnOpen();
+            goto Again;
+        }
+    }
+
+    return RET_OK;
+}
+
+int PrintTest(void)
+{
+    int iRc = 0;
+    // Print data cache
+    unsigned char aucPrintBuf[PRINT_ONELINE_BUF_LEN + 1] = {0};
+    unsigned char aucPrintSeparator[] = "- - - - - - - - - - - - - - - - - -";
+
+    Lib_PrnOpen();
+
+Again:
+    Lib_PrnSetSpace(8);
+
+    PrintBmp(0, "printlogo.bmp");
+
+    Lib_PrnSetFont(FONT32, 1, 1);
+    // Purchase order title
+    iRc = Lib_PrintStr(ALIGN_M, (unsigned char *)"Testing", strlen("Testing"));
+    if (RET_OK != iRc)
+    {
+        return iRc;
+    }
+    iRc = Lib_PrintStr(ALIGN_M, (unsigned char *)"POS Signing of purchase orders", strlen("POS Signing of purchase orders"));
+    if (RET_OK != iRc)
+    {
+        return iRc;
+    }
+    iRc = Lib_PrintStr(ALIGN_M, (unsigned char *)"MERCHANT COPY", strlen("MERCHANT COPY"));
+    if (RET_OK != iRc)
+    {
+        return iRc;
+    }
+
+    Lib_PrnSetSpace(10);
+    Lib_PrnSetFont(FONT32, 1, 1);
+    iRc = Lib_PrintStr(ALIGN_M, aucPrintSeparator, strlen((char*)aucPrintSeparator));
+    if (RET_OK != iRc)
+    {
+        return iRc;
+    }
+
+    iRc = Lib_PrintStr(ALIGN_L, (unsigned char *)"ISSUER Agricultural Bank of China", strlen("ISSUER Agricultural Bank of China"));
+    if (RET_OK != iRc)
+    {
+        return iRc;
+    }
+    iRc = Lib_PrintStr(ALIGN_L, (unsigned char *)"ACQ 48873110", strlen("ACQ 48873110"));
+    if (RET_OK != iRc)
+    {
+        return iRc;
+    }
+    iRc = Lib_PrintStr(ALIGN_L, (unsigned char *)"CARD number.", strlen("CARD number."));
+    if (RET_OK != iRc)
+    {
+        return iRc;
+    }
+    iRc = Lib_PrintStr(ALIGN_L, (unsigned char *)"6228 48x*****8 116 S", strlen("6228 48x*****8 116 S"));
+    if (RET_OK != iRc)
+    {
+        return iRc;
+    }
+    iRc = Lib_PrintStr(ALIGN_L, (unsigned char *)"TYPE of transaction(TXN TYPE)", strlen("TYPE of transaction(TXN TYPE)"));
+    if (RET_OK != iRc)
+    {
+        return iRc;
+    }
+    iRc = Lib_PrintStr(ALIGN_L, (unsigned char *)"SALE", strlen("SALE"));
+    if (RET_OK != iRc)
+    {
+        return iRc;
+    }
+    iRc = Lib_PrintStr(ALIGN_M, aucPrintSeparator, strlen((char*)aucPrintSeparator));
+    if (RET_OK != iRc)
+    {
+        return iRc;
+    }
+
+    Lib_PrnSetSpace(10);
+    Lib_PrnSetFont(20, 1, 1);
+    memset(aucPrintBuf, 0, sizeof(aucPrintBuf));
+    sprintf((char *)aucPrintBuf, "%s   %s\r\n%s", "Item/NO", "Quantity", "Amount");
+    iRc = Lib_PrintStr(ALIGN_J, aucPrintBuf, strlen((char *)aucPrintBuf));
+
+    memset(aucPrintBuf, 0, sizeof(aucPrintBuf));
+    sprintf((char *)aucPrintBuf, "%s\r\n%s", "BATCH NO", "000043");
+    iRc = Lib_PrintStr(ALIGN_J, aucPrintBuf, strlen((char *)aucPrintBuf));
+
+    memset(aucPrintBuf, 0, sizeof(aucPrintBuf));
+    sprintf((char *)aucPrintBuf, "%s\r\n%s", "VOUCHER NO", "000509");
+    iRc = Lib_PrintStr(ALIGN_J, aucPrintBuf, strlen((char *)aucPrintBuf));
+
+    memset(aucPrintBuf, 0, sizeof(aucPrintBuf));
+    sprintf((char *)aucPrintBuf, "%s\r\n%s", "AUTH NO", "000786");
+    iRc = Lib_PrintStr(ALIGN_J, aucPrintBuf, strlen((char *)aucPrintBuf));
+
+    // DATE/TIME:
+    memset(aucPrintBuf, 0, sizeof(aucPrintBuf));
+    sprintf((char *)aucPrintBuf, "%s\r\n%s", "DATE/TIME", "2014/12/07");
+    iRc = Lib_PrintStr(ALIGN_J, aucPrintBuf, strlen((char *)aucPrintBuf));
+    iRc = Lib_PrintStr(ALIGN_R, (unsigned char *)"16:15:17", strlen("16:15:17"));
+
+    memset(aucPrintBuf, 0, sizeof(aucPrintBuf));
+    sprintf((char *)aucPrintBuf, "%s\r\n%s", "REF NO", "0000015952");
+    iRc = Lib_PrintStr(ALIGN_J, aucPrintBuf, strlen((char *)aucPrintBuf));
+    iRc = Lib_PrintStr(ALIGN_R, (unsigned char *)"76", strlen("76"));
+
+    iRc = Lib_PrintStr(ALIGN_L, (unsigned char *)"2014/12/07", strlen("2014/12/07"));
+    iRc = Lib_PrintStr(ALIGN_L, (unsigned char *)"16:15:17", strlen("16:15:17"));
+
+    iRc = Lib_PrintStr(ALIGN_L, (unsigned char *)"AMOUNT:", strlen("AMOUNT:"));
+
+    Lib_PrnSetFont(FONT8, 1, 1);
+    iRc = Lib_PrintStr(ALIGN_M, (unsigned char *)" ", 1);
+    Lib_PrnSetFont(FONT32, 1, 1);
+    iRc = Lib_PrintStr(ALIGN_M, aucPrintSeparator, strlen((char*)aucPrintSeparator));
+    Lib_PrnSetFont(FONT8, 1, 1);
+    iRc = Lib_PrintStr(ALIGN_M, (unsigned char *)" ", 1);
+
+    Lib_PrnSetFont(FONT48, 1, 1);
+    iRc = Lib_PrintStr(ALIGN_M, (unsigned char *)"RMB:249.00", strlen("RMB:249.00"));
+
+    Lib_PrnSetFont(FONT8, 1, 1);
+    iRc = Lib_PrintStr(ALIGN_M, (unsigned char *)" ", 1);
+    Lib_PrnSetFont(FONT32, 1, 1);
+    iRc = Lib_PrintStr(ALIGN_M, aucPrintSeparator, strlen((char*)aucPrintSeparator));
+
+    Lib_PrnSetSpace(8);
+    Lib_PrnSetFont(FONT18, 1, 1);
+    memset(aucPrintBuf, 0, sizeof(aucPrintBuf));
+    sprintf((char *)aucPrintBuf, "Please scan the BarCode for getting more information:");
+    iRc = Lib_PrintStr(ALIGN_L, aucPrintBuf, strlen((char*)aucPrintBuf));
+    Lib_PrnXCode(60, "123456", 250, 88, NULL);
+    iRc = Lib_PrintStr(ALIGN_M, (unsigned char *)" ", 1);
+
+    memset(aucPrintBuf, 0, sizeof(aucPrintBuf));
+    sprintf((char *)aucPrintBuf, "Please scan the QRCode for getting more information:");
+    iRc = Lib_PrintStr(ALIGN_L, aucPrintBuf, strlen((char*)aucPrintBuf));
+    iRc = Lib_PrintStr(ALIGN_M, (unsigned char *)" ", 1);
+    Lib_PrnXCode(100, "123456", 136, 0, NULL);
 
     // Turn off the printer when printing is complete
     iRc = Lib_PrnClose();

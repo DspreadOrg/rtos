@@ -53,7 +53,7 @@ function(add_appimg target ldscript)
     cpp_only(${gen_ldscript} ${ldscript})
     add_executable(${target} ${ARGN} ${core_stub_o})
     set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${out_hex_dir})
-    target_link_libraries(${target} PRIVATE -T $<TARGET_OBJECTS:${gen_ldscript}>)
+    target_link_libraries(${target} PRIVATE "-T$<TARGET_OBJECTS:${gen_ldscript}>")
     target_link_libraries(${target} PRIVATE -Wl,-Map=${target_map_file} -nostdlib -Wl,--gc-sections)
 
     add_custom_command(TARGET ${target} POST_BUILD

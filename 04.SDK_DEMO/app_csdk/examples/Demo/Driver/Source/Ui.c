@@ -1227,7 +1227,9 @@ short UISelectThemeColor(int themeColor)
 
     ret = SetColorParam(&themePara, sizeof(themePara));
     UiRefreshNow();
-
+#ifdef HW_D30R
+    LvUiRefreshStatusBar();
+#endif
     return ret;
 }
 
@@ -1263,8 +1265,8 @@ short UILvglMenuStyle1(int timeout, LVGL_MENU *pLvglMenu)
     unsigned char curShowSize = 0;
     unsigned char curMenuIndex = 0;
     unsigned char curIconPositionNum = 0;
-    unsigned char positionX = 0;
-    unsigned char positionY = 0;
+    unsigned int positionX = 0;
+    unsigned int positionY = 0;
     char dispBuff[48] = {0};
     t_lvgl_image img = { 0 };
 
@@ -1365,8 +1367,8 @@ short UILvglMenuStyle2(int timeout, LVGL_MENU *pLvglMenu)
     unsigned char curShowSize = 0;
     unsigned char curMenuIndex = 0;
     signed char curIndex = -1;
-    unsigned char positionX = 0;
-    unsigned char positionY = 0;
+    unsigned int positionX = 0;
+    unsigned int positionY = 0;
     char dispBuff[48] = {0};
     t_lvgl_image img = { 0 };
 
@@ -1640,7 +1642,7 @@ short UISetParaByIpInput(unsigned char ucBitMap, char *title, int iTimeout)
         }
 
         sRC = LvUiWaitKey(iTimeout);
-        if(sRC == KB_UP || sRC == KB_DOWN || sRC == KB_CANCEL || sRC == LVGL_OPER_TIMEOUT)
+        if (sRC == KB_UP || sRC == KB_DOWN || sRC == KB_CANCEL || sRC == LVGL_OPER_TIMEOUT)
         {
             lv_obj_del(body);
             return sRC;

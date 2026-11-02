@@ -1113,7 +1113,7 @@ void DeviceParaInit(void)
     TRACE("TerminalParamInit ucBrightLevel:%d", g_teminal_param.ucBrightLevel);
     Lib_LcdSetBrightLevel(g_teminal_param.ucBrightLevel);
     // Initialize printing concentration level 5
-    Lib_PrnSetGrade(PRINT_GRADE_MAX);
+    // Lib_PrnSetGrade(PRINT_GRADE_MAX);
 }
 
 

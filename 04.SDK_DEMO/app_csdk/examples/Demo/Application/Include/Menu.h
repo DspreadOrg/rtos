@@ -48,6 +48,27 @@ typedef enum
 #define MENU_TITLE_COMMON_OFF_X                     0
 #define MENU_TITLE_COMMON_OFF_Y                     0
 
+#ifdef HW_D30R
+#define MENU_LEVEL_ONE_COLUMN_ONE_OFF_X             20
+#define MENU_LEVEL_ONE_COLUMN_TWO_OFF_X             180
+#define MENU_LEVEL_ONE_COLUMN_THREE_OFF_X           340
+#define MENU_LEVEL_ONE_LINE_ONE_OFF_Y               100
+#define MENU_LEVEL_ONE_LINE_TWO_OFF_Y               260
+#define MENU_LEVEL_ONE_LINE_THREE_OFF_Y             420
+
+#define MENU_LEVEL_STYLE1_COLUMN_ONE_OFF_X          20
+#define MENU_LEVEL_STYLE1_LINE_ONE_OFF_Y            100
+#define MENU_LEVEL_STYLE1_COLUMN_WIDTH              230
+#define MENU_LEVEL_STYLE1_LINE_WIDTH                170
+#define MENU_LEVEL_STYLE1_COLUMN_NUM                2
+#define MENU_LEVEL_STYLE1_SUBICON_OFF_X             23
+#define MENU_LEVEL_STYLE1_SUBICON_OFF_Y             10
+
+#define MENU_LEVEL_STYLE2_COLUMN_ONE_OFF_X           12
+#define MENU_LEVEL_STYLE2_LINE_ONE_OFF_Y             80
+#define MENU_LEVEL_STYLE2_LINE_WIDTH                 60
+
+#else
 #define MENU_LEVEL_ONE_COLUMN_ONE_OFF_X             7
 #define MENU_LEVEL_ONE_COLUMN_TWO_OFF_X             111
 #define MENU_LEVEL_ONE_COLUMN_THREE_OFF_X           215
@@ -67,8 +88,10 @@ typedef enum
 #define MENU_LEVEL_STYLE2_LINE_ONE_OFF_Y             45
 #define MENU_LEVEL_STYLE2_LINE_WIDTH                 38
 
+#endif
+
 #define ICON_DEBUG_X                                50
-#define ICON_SPK_X                                  250
+#define ICON_SPK_X                                  (LCD_MAX_SEG - 70)
 
 //-----------------------------------------------------------------------------
 // variable declaration

@@ -525,6 +525,8 @@ typedef enum
     ID_MENU_RKI_KEY,
     ID_MENU_RKI_UNBIND,
     ID_MENU_RKI_REBIND,
+
+    ID_TIP_NFC_MULTI_CARDS,
 } EN_LANGUAGE_ID;
 
 /**********************************************************************************************************

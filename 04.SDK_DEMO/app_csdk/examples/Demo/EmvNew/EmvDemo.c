@@ -8,12 +8,12 @@
 /**************************** INCLUDE FILES BEGIN **************************/
 
 #include "EmvDemo.h"
-#include "key.h"
+#include "Key.h"
 #include "Ui.h"
 #include "Common.h"
 #include <math.h>
-#include "LibDukpt.h"
-#include "card.h"
+#include <string.h>
+#include "Card.h"
 #include "VAN_security.h"
 #include "MessageBox.h"
 #include "Idle.h"
@@ -22,13 +22,17 @@
 #include "Communication.h"
 #include "CardTrade.h"
 
+#include "api_lvgl.h"
 #include "EmvUtils.h"
+#include "app_emv.h"
 
 extern ST_MSC_TRACK astCiTrack[TRACK_NUM];
 
 static unsigned char g_aucPAN[20];
 static unsigned char g_ucPANLen;
 static unsigned char aucMacPanAscii[30];
+
+
 
 #define MSC_TMP_BUF_LEN 1000 //
 
@@ -171,1158 +175,311 @@ static u8 GetCardSevCode(unsigned char *pucTrackBuf, unsigned char *pucCardSevCo
     return TRUE;
 }
 
-static int app_user_online_request(unsigned char *buf, unsigned int len)
+void _lv_offline_pinpad_callback(unsigned char input_count, const unsigned char ucLastTimes)
 {
-    unsigned char host_rsp[64];
-    unsigned int host_rsp_len = 0;
+    unsigned char aucInput[13] = {0};
+    memset(aucInput, '*', input_count);
 
-    kernel_tlv_new(host_rsp, 0x7F00, 0, 0);
-    host_rsp_len =
-        kernel_tlv_add_child(host_rsp, 0x8A, 2, (unsigned char *)"\x30\x30");
+    UIClearRect(0, 0, LCD_MAX_SEG,  MAX_COM_LINES - 1);
 
-    memcpy(buf, host_rsp, host_rsp_len);
+    UITextAlign(ALIGN_L, 2, DISP_MODE_NORMAL, "Off-Line Pin:");
 
-    return 0;
+    UIText(14, 3, DISP_MODE_NORMAL, (void *)aucInput);
 }
-
-static int app_user_nfc_disp(unsigned char *buf, unsigned int len)
-{
-    unsigned char *node = 0;
-    unsigned char *value = 0;
-    char cStr[32];
-
-    user_interface_request_data_t UIRD;
-    memset(&UIRD, 0, sizeof(UIRD));
-
-    node = kernel_tlv_find(buf, 0xDF8116);
-    if (node)
-    {
-        value = kernel_tlv_get_v(node);
-        memcpy(&UIRD, (user_interface_request_data_t *)value, sizeof(user_interface_request_data_t));
-    }
-
-    TRACE("Emv app user nfc display id = %02XH", UIRD.ucMessageIdentifier);
-
-    UIClearRect(0, 1, LCD_MAX_SEG, MAX_COM_LINES - 1);
-
-    switch (UIRD.ucMessageIdentifier)
-    {
-    case CONTACTLESS_UIRD_MessageID_PRESENT_CARD:
-        UITextAlign(ALIGN_M, 1, DISP_MODE_NORMAL, "insert/swipe/present card");
-        break;
-    case CONTACTLESS_UIRD_MessageID_PROCESSING:
-        UITextAlign(ALIGN_M, 1, DISP_MODE_NORMAL, "Processing...");
-        break;
-    case CONTACTLESS_UIRD_MessageID_AUTHORISING_PLEASEWATI:
-        UITextAlign(ALIGN_M, 1, DISP_MODE_NORMAL, "Authorising Please Wait...");
-        break;
-    case CONTACTLESS_UIRD_MessageID_ERROR_OTHER_CARD:
-        UITextAlign(ALIGN_M, 1, DISP_MODE_NORMAL, "TERMINATE");
-        // OsBeep(7, 500);
-        break;
-    case CONTACTLESS_UIRD_MessageID_DECLINED:
-        UITextAlign(ALIGN_M, 1, DISP_MODE_NORMAL, "Decline");
-        // OsBeep(7, 500);
-        break;
-    case CONTACTLESS_UIRD_MessageID_APPROVED:
-        UITextAlign(ALIGN_M, 1, DISP_MODE_NORMAL, "Approve");
-        // OsBeep(7, 500);
-        break;
-    default:
-        memset(cStr, 0, sizeof(cStr));
-        sprintf(cStr, "Unknown %02XH", UIRD.ucMessageIdentifier);
-        UITextAlign(ALIGN_M, 1, DISP_MODE_NORMAL, cStr);
-        // OsBeep(7, 1000);
-        break;
-    }
-
-    return 0;
-}
-
-static int app_user_icc_disp(unsigned char *buf, unsigned int len)
-{
-    unsigned char *node = 0;
-    unsigned char disp_id = 0;
-
-    node = kernel_tlv_find(buf, 0x9F8711);
-    if (node == 0)
-    {
-        return -1;
-    }
-
-    disp_id = kernel_tlv_get_v(node)[0];
-
-    TRACE("Emv app user icc display id = %02XH", disp_id);
-
-    switch (disp_id)
-    {
-    case CONTACT_DISP_ID_OFFLINE_APPROVED:
-        // TransView_vShowLine(2,EM_DTYPE_NORMAL,EM_ALIGN_CENTER,(char*)"offline
-        // approve");
-        break;
-    case CONTACT_DISP_ID_OFFLINE_DECLINED:
-        // TransView_vShowLine(2,EM_DTYPE_NORMAL,EM_ALIGN_CENTER,(char*)"offline
-        // declined");
-        break;
-    case CONTACT_DISP_ID_ONLINE_APPROVED:
-        // TransView_vShowLine(2,EM_DTYPE_NORMAL,EM_ALIGN_CENTER,(char*)"online
-        // approve");
-        break;
-    case CONTACT_DISP_ID_ONLINE_DECLINED:
-        // TransView_vShowLine(2,EM_DTYPE_NORMAL,EM_ALIGN_CENTER,(char*)"online
-        // declined");
-        break;
-    case CONTACT_DISP_ID_UNABLEONLINE_OFFLINE_APPROVED:
-        break;
-    case CONTACT_DISP_ID_UNABLEONLINE_OFFLINE_DECLINED:
-        break;
-    case CONTACT_DISP_ID_TRY_ANOTHER_INTERFACE:
-        break;
-    case CONTACT_DISP_ID_TERMINATE:
-        // TransView_vShowLine(2,EM_DTYPE_NORMAL,EM_ALIGN_CENTER,(char*)"terminate");
-        break;
-    case CONTACT_DISP_ID_NOT_ALLOWED:
-        break;
-    case CONTACT_DISP_ID_NOT_ACCEPTED:
-        break;
-    default:
-        // TransView_vShowLine(2,EM_DTYPE_NORMAL,EM_ALIGN_CENTER,(char*)"display...");
-        // OsBeep(7, 1000);
-        break;
-    }
-
-    return 0;
-}
-
-int app_user_cbk(void *user_data, unsigned char *buf, unsigned int len)
-{
-    // int ret = 0;
-    unsigned char *node = 0;
-    unsigned char cmd = 0;
-
-    node = kernel_tlv_find(buf, 0xDF00);
-    if (node == 0)
-    {
-        return -1;
-    }
-    cmd = kernel_tlv_get_v(node)[0];
-
-    TRACE("Emv app user cbk, CMD = %02XH", cmd);
-    TRACEBUF(buf, len);
-
-    switch (cmd)
-    {
-    case CMD_CVM_OFFLINE_PIN:
-    case CMD_EMV_CALLBACK_CVM_OFFLINE_PIN:
-
-        // TransView_vShowLine(2,EM_DTYPE_NORMAL,EM_ALIGN_CENTER,(char*)"pls input offline pin");
-        // OsBeep(3, 500);
-        // break;
-        return -1;
-    case CMD_CVM_ONLINE_PIN:
-    case CMD_EMV_CALLBACK_CVM_ONLINE_PIN:
-        // TransView_vShowLine(2,EM_DTYPE_NORMAL,EM_ALIGN_CENTER,(char*)"pls input online pin");
-        // OsBeep(3, 500);
-        //  memset(buf, 0, sizeof(buf));
-        //  memcpy(buf, "\x7F\x00\x0A\x99\x08\xCE\x6E\xB6\xA5\x43\x65\x96\xF6", 13);
-        // break;
-        return -1;
-    case CMD_EMV_CALLBACK_ONLINE_REQUEST: // BC
-        app_user_online_request(buf, len);
-        break;
-    case CMD_NFC_ONLINE_REQUEST:
-        app_user_online_request(buf, len);
-        break;
-    case CMD_DISPLAY_UIRD_MSG: // D7
-        app_user_nfc_disp(buf, len);
-        break;
-    case CMD_DISPLAY_ICC_MSG: // C5
-        app_user_icc_disp(buf, len);
-        break;
-    case CMD_EMV_CALLBACK_CARDHOLDER_CONFIRMATION:
-        // app_user_cardholder_confirm(buf, len);
-        break;
-    default:
-        break;
-    }
-
-    return 0;
-}
-#define FILE_NAME_EMV_APP "emv_app.bin"
-#define FILE_NAME_EMV_CAPK "emv_capk.bin"
-
-#define EMV_APP_PAGE_SIZE (384)
-#define EMV_CAPK_PAGE_SIZE (384)
-
-static int trans_cbk_fs_get_ics(unsigned char *cbk_buf, unsigned int cbk_buf_len)
-{
-    FUN_IN;
-
-    int fd;
-    unsigned char filebuf[512];
-    unsigned int filebuf_len = 0;
-    unsigned char temp_buf[1024];
-    unsigned char *pchild = 0;
-
-    fd = Lib_FileOpen(FILE_NAME_EMV_APP, LFS_O_RDONLY);
-    if (fd < 0)
-    {
-        TRACE("Emv ics, fopen fail");
-        return -1;
-    }
-
-    memset(filebuf, 0, sizeof(filebuf));
-    filebuf_len = Lib_FileRead(fd, filebuf, EMV_APP_PAGE_SIZE);
-    Lib_FileClose(fd);
-
-    cbk_buf_len = kernel_tlv_new(cbk_buf, 0x7F00, 0, 0);
-
-    kernel_tlv_new(temp_buf, 0x7F00, filebuf_len, filebuf);
-    pchild = kernel_tlv_get_first_child(temp_buf);
-    while (pchild)
-    {
-        unsigned int tag = 0;
-        unsigned int len = 0;
-        unsigned char *value = 0;
-
-        tag = kernel_tlv_get_t(pchild);
-        if (tag == 0)
-            break;
-
-        len = kernel_tlv_get_l(pchild);
-        value = kernel_tlv_get_v(pchild);
-
-        cbk_buf_len = kernel_tlv_add_child(cbk_buf, tag, len, value);
-
-        pchild = kernel_tlv_get_next_child(pchild);
-    }
-
-    TRACE("Emv ics (%d)", cbk_buf_len);
-    TRACEBUF(cbk_buf, cbk_buf_len);
-
-    return 0;
-}
-
-static int trans_cbk_fs_get_aid_list(unsigned char *cbk_buf, unsigned int cbk_buf_len)
-{
-    FUN_IN;
-
-    int fd;
-    unsigned char tempBuf[512] = {0};
-    unsigned char aidItem[16] = {0};
-    unsigned int aidItemLen = 0;
-
-    fd = Lib_FileOpen(FILE_NAME_EMV_APP, LFS_O_RDONLY);
-    if (fd < 0)
-    {
-        TRACE("Emv aid list, fopen fail");
-        return -1;
-    }
-
-    cbk_buf_len = kernel_tlv_new(cbk_buf, 0x7F00, 0, 0);
-
-    Lib_FileSeek(fd, EMV_APP_PAGE_SIZE, SEEK_SET); // 跳过ICS
-
-    while (Lib_FileRead(fd, tempBuf, EMV_APP_PAGE_SIZE) == EMV_APP_PAGE_SIZE)
-    {
-        FUN_IN;
-        unsigned char *pNode = 0;
-        unsigned char *pValue = 0;
-        unsigned int valueLen = 0;
-
-        // memset(tempBuf, 0, sizeof(tempBuf));
-        memset(aidItem, 0, sizeof(aidItem));
-        aidItemLen = 0;
-
-        // fread(tempBuf, sizeof(char), EMV_APP_PAGE_SIZE, fp);
-
-        // AID
-        pNode = kernel_tlv_find(tempBuf, 0x9F06);
-        if (pNode == 0)
-        {
-            continue;
-        }
-        pValue = kernel_tlv_get_v(pNode);
-        valueLen = kernel_tlv_get_l(pNode);
-        memcpy(aidItem + 2, pValue, valueLen);
-        aidItemLen += valueLen;
-
-        // kernel id
-        if (memcmp(pValue, "\xA0\x00\x00\x00\x03", 5) == 0)
-            aidItem[1] = KERNEL_ID_VISA;
-        else if (memcmp(pValue, "\xA0\x00\x00\x00\x04", 5) == 0)
-            aidItem[1] = KERNEL_ID_MASTERCARD;
-        else if (memcmp(pValue, "\xA0\x00\x00\x02\x28", 5) == 0)
-            aidItem[1] = KERNEL_ID_MASTERCARD;
-        else if (memcmp(pValue, "\xA0\x00\x00\x00\x65", 5) == 0)
-            aidItem[1] = KERNEL_ID_JCB;
-        else if (memcmp(pValue, "\xA0\x00\x00\x00\x25", 5) == 0)
-            aidItem[1] = KERNEL_ID_AMEX;
-        else if (memcmp(pValue, "\xA0\x00\x00\x00\x52", 5) == 0)
-            aidItem[1] = KERNEL_ID_D_PAS;
-        else if (memcmp(pValue, "\xA0\x00\x00\x00\x24", 5) == 0)
-            aidItem[1] = KERNEL_ID_D_PAS;
-        else if (memcmp(pValue, "\xA0\x00\x00\x04\x94", 5) == 0)
-            aidItem[1] = KERNEL_ID_D_PAS;
-        else if (memcmp(pValue, "\xA0\x00\x00\x03\x33", 5) == 0)
-            aidItem[1] = KERNEL_ID_CUP;
-        else if (memcmp(pValue, "\xA0\x00\x00\x05\x24", 5) == 0)
-            aidItem[1] = KERNEL_ID_RUPAY;
-        else if (memcmp(pValue, "\xA0\x00\x00\x02\x77", 5) == 0)
-            aidItem[1] = KERNEL_ID_INTERAC;
-        else if (memcmp(pValue, "\xD9\x99\x99\x99\x99", 5) == 0)
-            aidItem[1] = KERNEL_ID_PURE;
-        else if (memcmp(pValue, "\xAA\xA0\x00\x00\x01", 5) == 0)
-            aidItem[1] = KERNEL_ID_PURE;
-        else if (memcmp(pValue, "\xA0\x00\x00\x06\x58", 5) == 0)
-            aidItem[1] = KERNEL_ID_MIRPS;
-        else if (memcmp(pValue, "\xA0\x00\x00\x01\x41", 5) == 0)
-            aidItem[1] = KERNEL_ID_BANCOMAT;
-
-        // ASI
-        pNode = kernel_tlv_find(tempBuf, 0xDF01);
-        if (pNode)
-        {
-            pValue = kernel_tlv_get_v(pNode);
-            aidItem[0] = pValue[0];
-        }
-        else
-        {
-            aidItem[0] = 0;
-        }
-
-        aidItemLen += 2;
-
-        cbk_buf_len = kernel_tlv_add_child(cbk_buf, 0x9F06, aidItemLen, aidItem);
-
-        memset(tempBuf, 0, sizeof(tempBuf));
-    }
-
-    Lib_FileClose(fd);
-
-    TRACE("Emv aid list (%d)", cbk_buf_len);
-    TRACEBUF(cbk_buf, cbk_buf_len);
-
-    return 0;
-}
-
-static int trans_cbk_fs_get_bctc_aid_list(unsigned char *cbk_buf,
-                                   unsigned int cbk_buf_len)
-{
-    FUN_IN;
-    int fd;
-    unsigned char tempBuf[512] = {0};
-    unsigned char aidItem[16] = {0};
-    unsigned int aidItemLen = 0;
-
-    fd = Lib_FileOpen(FILE_NAME_EMV_APP, LFS_O_RDONLY);
-    if (fd < 0)
-    {
-        TRACE("Emv ic aid list, fopen fail");
-        return -1;
-    }
-
-    cbk_buf_len = kernel_tlv_new(cbk_buf, 0x7F00, 0, 0);
-
-    Lib_FileSeek(fd, EMV_APP_PAGE_SIZE, SEEK_SET); // 跳过ICS
-
-    while (Lib_FileRead(fd, tempBuf, EMV_APP_PAGE_SIZE) == EMV_APP_PAGE_SIZE)
-    {
-        unsigned char *pNode = 0;
-        unsigned char *pValue = 0;
-        unsigned int valueLen = 0;
-
-        // memset(tempBuf, 0, sizeof(tempBuf));
-        memset(aidItem, 0, sizeof(aidItem));
-        aidItemLen = 0;
-
-        // AID
-        pNode = kernel_tlv_find(tempBuf, 0x9F06);
-        if (pNode == 0)
-        {
-            continue;
-        }
-        pValue = kernel_tlv_get_v(pNode);
-        valueLen = kernel_tlv_get_l(pNode);
-        memcpy(aidItem + 1, pValue, valueLen);
-        aidItemLen += valueLen;
-
-        // Length + ASI
-        aidItem[0] = valueLen;
-        pNode = kernel_tlv_find(tempBuf, 0xDF01);
-        if (pNode)
-        {
-            if (kernel_tlv_get_v(pNode)[0] == 0)
-            {
-                aidItem[0] |= 0x80;
-            }
-        }
-
-        aidItemLen += 1;
-
-        cbk_buf_len = kernel_tlv_add_child(cbk_buf, 0x9F8724, aidItemLen, aidItem);
-    }
-
-    Lib_FileClose(fd);
-
-    TRACE("Emv ic aid list (%d)", cbk_buf_len);
-    TRACEBUF(cbk_buf, cbk_buf_len);
-
-    return 0;
-}
-
-static int trans_cbk_fs_get_aid_param(unsigned char *cbk_buf, unsigned int cbk_buf_len)
-{
-    int fd;
-    unsigned char tempBuf[512] = {0};
-    unsigned char flag = 0;
-    unsigned char tempTlvBuf[1024] = {0};
-    unsigned char *pChild = 0;
-
-    unsigned char *pNode = 0;
-    unsigned char aid[16] = {0};
-    unsigned int aidLen = 0;
-    unsigned char trans_type = 0;
-
-    pNode = kernel_tlv_find(cbk_buf, 0x9F06);
-    if (pNode == 0)
-    {
-        return -1;
-    }
-    memset(aid, 0, sizeof(aid));
-    aidLen = kernel_tlv_get_l(pNode);
-    memcpy(aid, kernel_tlv_get_v(pNode), aidLen);
-
-    pNode = kernel_tlv_find(cbk_buf, 0x9C);
-    if (pNode != 0)
-    {
-        trans_type = kernel_tlv_get_v(pNode)[0];
-    }
-
-    fd = Lib_FileOpen(FILE_NAME_EMV_APP, LFS_O_RDONLY);
-    if (fd < 0)
-    {
-        TRACE("EMV aid param, fopen fail");
-        return -1;
-    }
-
-    Lib_FileSeek(fd, EMV_APP_PAGE_SIZE, SEEK_SET); // 跳过ICS
-
-    while (Lib_FileRead(fd, tempBuf, EMV_APP_PAGE_SIZE) == EMV_APP_PAGE_SIZE)
-    {
-        unsigned char *pNode = 0;
-        unsigned char *pValue = 0;
-        unsigned int valueLen = 0;
-
-        pNode = kernel_tlv_find(tempBuf, 0x9F06);
-        if (pNode == 0)
-        {
-            continue;
-        }
-        pValue = kernel_tlv_get_v(pNode);
-        valueLen = kernel_tlv_get_l(pNode);
-
-        if (memcmp(aid, pValue, valueLen) != 0)
-        {
-            memset(tempBuf, 0, sizeof(tempBuf));
-            continue;
-        }
-
-        flag = 1;
-        break;
-    }
-
-    Lib_FileClose(fd);
-
-    if (flag == 0)
-    {
-        TRACE("EMV aid param, not find");
-        return -1;
-    }
-
-    cbk_buf_len = kernel_tlv_new(cbk_buf, 0x7F00, 0, 0);
-
-    kernel_tlv_new(tempTlvBuf, 0x7F00, EMV_APP_PAGE_SIZE, tempBuf);
-    pChild = kernel_tlv_get_first_child(tempTlvBuf);
-    while (pChild)
-    {
-        unsigned int tag = 0;
-        unsigned int len = 0;
-        unsigned char *value = 0;
-
-        tag = kernel_tlv_get_t(pChild);
-        if (tag == 0)
-            break;
-
-        len = kernel_tlv_get_l(pChild);
-        value = kernel_tlv_get_v(pChild);
-
-        if (tag == 0x7F11)
-        {
-            unsigned char *child_7F11 = 0;
-
-            pNode = kernel_tlv_find(value, 0x9C);
-            if (pNode == 0)
-            {
-                pChild = kernel_tlv_get_next_child(pChild);
-                continue;
-            }
-
-            if (kernel_tlv_get_v(pNode)[0] != trans_type)
-            {
-                pChild = kernel_tlv_get_next_child(pChild);
-                continue;
-            }
-
-            child_7F11 = kernel_tlv_get_first_child(pChild);
-            while (child_7F11)
-            {
-                unsigned int child_tag = 0;
-                unsigned int child_len = 0;
-                unsigned char *child_val = 0;
-
-                child_tag = kernel_tlv_get_t(child_7F11);
-                child_len = kernel_tlv_get_l(child_7F11);
-                child_val = kernel_tlv_get_v(child_7F11);
-
-                cbk_buf_len = kernel_tlv_add_child(cbk_buf, child_tag, child_len, child_val);
-                child_7F11 = kernel_tlv_get_next_child(child_7F11);
-            }
-
-            pChild = kernel_tlv_get_next_child(pChild);
-            continue;
-        }
-
-        cbk_buf_len = kernel_tlv_add_child(cbk_buf, tag, len, value);
-
-        pChild = kernel_tlv_get_next_child(pChild);
-    }
-
-    TRACE("EMV aid param (%d)", cbk_buf_len);
-    TRACEBUF(cbk_buf, cbk_buf_len);
-
-    return 0;
-}
-
-static int trans_cbk_fs_get_capk(unsigned char *cbk_buf, unsigned int cbk_buf_len)
-{
-    unsigned char *node = 0;
-    unsigned char aid[16] = {0};
-    unsigned int aidLen = 0;
-    unsigned char index = 0;
-    int fd;
-    unsigned char tempBuf[512] = {0};
-    unsigned char flag = 0;
-
-    TRACE("EMV get capk");
-    TRACEBUF(cbk_buf, cbk_buf_len);
-
-    node = kernel_tlv_find(cbk_buf, 0x9F06);
-    if (node == 0)
-    {
-        return -1;
-    }
-    memset(aid, 0, sizeof(aid));
-    aidLen = kernel_tlv_get_l(node);
-    memcpy(aid, kernel_tlv_get_v(node), aidLen);
-
-    TRACE("EMV capk, aid:");
-    TRACEBUF(aid, aidLen);
-
-    node = kernel_tlv_find(cbk_buf, 0x8F);
-    if (node == 0)
-    {
-        return -1;
-    }
-    index = kernel_tlv_get_v(node)[0];
-    TRACE("EMV capk, index = %d", index);
-
-    fd = Lib_FileOpen(FILE_NAME_EMV_CAPK, LFS_O_RDONLY);
-    if (fd < 0)
-    {
-        TRACE("EMV capk, fopen fail");
-        return -1;
-    }
-
-    while (Lib_FileRead(fd, tempBuf, EMV_CAPK_PAGE_SIZE) == EMV_CAPK_PAGE_SIZE)
-    {
-        unsigned char *pNode = 0;
-        unsigned char *pValue = 0;
-
-        // memset(tempBuf, 0, sizeof(tempBuf));
-        // fread(tempBuf, sizeof(char), EMV_CAPK_PAGE_SIZE, fp);
-
-        pNode = kernel_tlv_find(tempBuf, 0x9F06);
-        if (pNode == 0)
-        {
-            continue;
-        }
-        pValue = kernel_tlv_get_v(pNode);
-        kernel_tlv_get_l(pNode);
-        TRACEBUF(pValue, 5);
-        if (memcmp(aid, pValue, 5) != 0)
-        {
-            continue;
-        }
-
-        pNode = kernel_tlv_find(tempBuf, 0x9F22);
-        if (pNode == 0)
-        {
-            continue;
-        }
-        TRACE("EMV capk, check index = %d", kernel_tlv_get_v(pNode)[0]);
-        if (kernel_tlv_get_v(pNode)[0] != index)
-        {
-            continue;
-        }
-
-        flag = 1;
-        break;
-    }
-
-    Lib_FileClose(fd);
-
-    if (flag == 0)
-    {
-        TRACE("EMV capk, not find");
-        return -1;
-    }
-
-    cbk_buf_len = kernel_tlv_new(cbk_buf, 0x7F00, 0, 0);
-
-    node = kernel_tlv_find(tempBuf, 0xDF02);
-    if (node == 0)
-    {
-        return -1;
-    }
-    cbk_buf_len = kernel_tlv_add_child(cbk_buf, 0xDF8201, kernel_tlv_get_l(node),
-                                       kernel_tlv_get_v(node));
-
-    node = kernel_tlv_find(tempBuf, 0xDF04);
-    if (node == 0)
-    {
-        return -1;
-    }
-    cbk_buf_len = kernel_tlv_add_child(cbk_buf, 0xDF8202, kernel_tlv_get_l(node),
-                                       kernel_tlv_get_v(node));
-
-    node = kernel_tlv_find(tempBuf, 0xDF05);
-    if (node)
-    {
-    }
-
-    TRACE("EMV capk (%d):", cbk_buf_len);
-    TRACEBUF(cbk_buf, cbk_buf_len);
-
-    return 0;
-}
-
-static int trans_cbk_fs_get_exception_file(unsigned char *cbk_buf,
-                                    unsigned int cbk_buf_len)
-{
-    kernel_tlv_new(cbk_buf, 0x7F00, 0, 0);
-    cbk_buf_len =
-        kernel_tlv_add_child(cbk_buf, 0xDF05, 1, (unsigned char *)"\x00");
-    return cbk_buf_len;
-}
-
-#if 0
-static void power_on_display_processing(void)
-{
-    unsigned char cmd = CMD_DISPLAY_UIRD_MSG;
-    unsigned char disp_buf[128];
-    unsigned int disp_buf_len = 0;
-    // unsigned char *node = 0;
-    user_interface_request_data_t UIRD;
-
-    memset(&UIRD, 0, sizeof(user_interface_request_data_t));
-    UIRD.ucMessageIdentifier = CONTACTLESS_UIRD_MessageID_PROCESSING;
-    UIRD.ucStatus = CONTACTLESS_UIRD_STATUS_NA;
-    UIRD.ucHoldTime[0] = 0;
-    UIRD.ucHoldTime[1] = 0;
-    UIRD.ucHoldTime[2] = 0;
-
-    kernel_tlv_new(disp_buf, 0x7F00, 0, 0);
-    kernel_tlv_add_child(disp_buf, 0xDF00, 1, &cmd);
-    disp_buf_len = kernel_tlv_add_child(disp_buf, 0xDF8116, sizeof(user_interface_request_data_t), (unsigned char *)&UIRD);
-
-    app_user_cbk(NULL, disp_buf, disp_buf_len);
-}
-#endif
-
-static short s_emv_card_mode = -1;
-static void trans_cbk_power_on(void)
-{
-    // int ret = -1;
-    // int cardtype = 0;
-    Signal_Message SignalMessage;
-
-    memset(&SignalMessage, 0x00, sizeof(Signal_Message));
-    SignalMessage.syn_data = 0;
-    SignalMessage.syn_data_len = 0;
-#if 1
-    // current flow already poweron for detect card, just check the mode here
-    TRACE("Emv poweron s_emv_card_mode = %d", s_emv_card_mode);
-    if (s_emv_card_mode == NFC_DETECETED)
-    {
-        SignalMessage.signal_type = CORRESPONDING_SIGNAL_RA;
-        emv_kernel_customized((unsigned char *)&SignalMessage, sizeof(Signal_Message));
-    }
-    else if (s_emv_card_mode == SCI_DETECETED)
-    {
-        SignalMessage.signal_type = CORRESPONDING_SIGNAL_IC_CARD_ACTIVE;
-        emv_kernel_customized((unsigned char *)&SignalMessage, sizeof(Signal_Message));
-    }
-    else
-    {
-        SignalMessage.signal_type = CORRESPONDING_SIGNAL_STOP;
-        emv_kernel_customized((unsigned char *)&SignalMessage, sizeof(Signal_Message));
-    }
-#else
-    if (g_card_type == 0x01)
-    {
-        g_card_type = 0;
-        SignalMessage.signal_type = CORRESPONDING_SIGNAL_RA;
-        emv_kernel_customized((unsigned char *)&SignalMessage, sizeof(Signal_Message));
-        return;
-    }
-    /*
-        ret = reader_enable();
-        if (ret)
-        {
-            SignalMessage.signal_type = CORRESPONDING_SIGNAL_STOP;
-            emv_kernel_ins_customized((unsigned char *)&SignalMessage, sizeof(Signal_Message));
-            return;
-        }
-
-        ret = reader_card_wait(&cardtype);
-        if (ret == 0)
-        */
-    {
-        power_on_display_processing();
-        switch (cardtype)
-        {
-        case CARD_NFC:
-            SignalMessage.signal_type = CORRESPONDING_SIGNAL_RA;
-            break;
-        case CARD_IC:
-            SignalMessage.signal_type = CORRESPONDING_SIGNAL_IC_CARD_ACTIVE;
-            break;
-        case CARD_MAG:
-            SignalMessage.signal_type = CORRESPONDING_SIGNAL_MAG_CARD_ACTIVE;
-            break;
-        default:
-            break;
-        }
-    }
-    else if (ret == ERR_USER_CANCEL)
-    {
-        SignalMessage.signal_type = CORRESPONDING_SIGNAL_CANCEL;
-    }
-    else if (ret == ERR_TIME_OUT)
-    {
-        SignalMessage.signal_type = CORRESPONDING_SIGNAL_TIMEOUT;
-    }
-    else
-    {
-        SignalMessage.signal_type = CORRESPONDING_SIGNAL_STOP;
-    }
-
-    emv_kernel_customized((unsigned char *)&SignalMessage, sizeof(Signal_Message));
-#endif
-}
-
-static void trans_cbk_power_off(void)
-{
-    FUN_IN;
-    // OsMsrClose();
-    // OsIccClose(0);
-    // OsPiccClose();
-}
-
-static unsigned char aucResp[1024];
-static unsigned short usRespLen = 0;
-static int trans_cbk_nfc_apdu(unsigned char *cbk_buf, unsigned int cbk_buf_len)
-{
+static int input_offline_pin(EMV_INPUT_PIN_TYPE cType, char *offlinePin)
+{ 
     int ret = -1;
-    unsigned char *pNode = 0;
-    unsigned char *pValue = 0;
-    unsigned int length = 0;
-
-    Signal_Message SignalMessage;
-
-    // memset(&ApduRsp,0,sizeof(ST_APDU_RSP));
-    // memset(&ApduReq,0,sizeof(ST_APDU_REQ));
-
-    pNode = kernel_tlv_find(cbk_buf, 0xDF01);
-    length = kernel_tlv_get_l(pNode);
-    pValue = kernel_tlv_get_v(pNode);
-
-    TRACE("EMV NFC C-APDU(%d):", length);
-    TRACEBUF(pValue, length);
-
-    ret = Lib_PiccCommand((unsigned char *)pValue, length, aucResp, &usRespLen);
-    TRACE("EMV NFC ret=%d, usRespLen=%d", ret, usRespLen);
-    // TRACEBUF(aucResp, usRespLen);
-    if (ret <= 0)
+    //unsigned char ucLastTimes;
+    unsigned char aucPinBlock[12+1] = {0};
+    pin_param param = { 0 };
+    param.min_input_count = 4;
+    param.max_input_count = 6;
+    param.timeout = 20;
+    param.is_bypass = 1;
+    Lib_PciSetPinpadUI(_lv_offline_pinpad_callback);
+    ret = Lib_PciOfflinePinpad(param, 1, (unsigned char *)offlinePin);
+    TRACE("Emv Lib_PciOfflinePinpad ret = %d", ret);
+    
+    if (ret == -1029)
     {
-        TRACE("EMV OsPiccIsoCommand Fail");
-        aucResp[0] = PAYPASS_ERROR_INDICATION_L1_TIME_OUT_ERROR;
-        SignalMessage.signal_type = CORRESPONDING_SIGNAL_L1RSP;
-        SignalMessage.syn_data = aucResp;
-        SignalMessage.syn_data_len = 1;
-        emv_kernel_customized((unsigned char *)&SignalMessage, sizeof(Signal_Message));
-        return ret;
-    }
-
-    // ApduRsp.DataOut[ApduRsp.LenOut] = ApduRsp.SWA;
-    // ApduRsp.DataOut[ApduRsp.LenOut + 1] = ApduRsp.SWB;
-
-    memset(&SignalMessage, 0x00, sizeof(Signal_Message));
-    SignalMessage.signal_type = CORRESPONDING_SIGNAL_RA;
-    SignalMessage.syn_data = aucResp;
-    SignalMessage.syn_data_len = usRespLen;
-
-    TRACE("EMV NFC R-APDU(%d):", SignalMessage.syn_data_len);
-    TRACEBUF(SignalMessage.syn_data, SignalMessage.syn_data_len);
-
-    emv_kernel_customized((unsigned char *)&SignalMessage, sizeof(Signal_Message));
-
-    return 0;
-}
-
-static int trans_cbk_icc_apdu(unsigned char *cbk_buf, unsigned int cbk_buf_len)
-{
-    int ret;
-    unsigned char *pNode = 0;
-    unsigned char *pValue = 0;
-    unsigned int length = 0;
-
-    pNode = kernel_tlv_find(cbk_buf, 0xDF01);
-    length = kernel_tlv_get_l(pNode);
-    pValue = kernel_tlv_get_v(pNode);
-
-    TRACE("EMV ICC C-APDU(%d):", length);
-    TRACEBUF(pValue, length);
-
-    ret = Lib_IccCommand(ICC_SLOT_EMV_IC, (unsigned char *)pValue, length,
-                         aucResp, &usRespLen);
-
-    TRACE("EMV ICC ret=%d, usRespLen=%d", ret, usRespLen);
-
-    if ((ret > 0) && (usRespLen == 2) && (aucResp[0] == 0x61))
-    {
-        TRACEBUF(aucResp, usRespLen);
-        unsigned char c_aucGetRspnd[5] = {0x00, 0xc0, 0x00, 0x00}; // 自动取响应命令
-        c_aucGetRspnd[4] = aucResp[1];
-        ret = Lib_IccCommand(ICC_SLOT_EMV_IC, (unsigned char *)c_aucGetRspnd, 5,
-                             aucResp, &usRespLen);
-
-        TRACE("EMV ICC1 ret=%d, usRespLen=%d", ret, usRespLen);
-    }
-    if ((ret > 0) && (usRespLen == 2) && (aucResp[0] == 0x6C))
-    {
-        TRACEBUF(aucResp, usRespLen);
-        pValue[4] = aucResp[1]; // 卡片期望的正确 Le 值
-        ret = Lib_IccCommand(ICC_SLOT_EMV_IC, (unsigned char *)pValue, length,
-                             aucResp, &usRespLen);
-
-        TRACE("EMV ICC2 ret=%d, usRespLen=%d", ret, usRespLen);
-    }
-
-    if (ret <= 0)
-    {
-        TRACE("EMV OsIccExchange Fail");
+        TRACE("Emv Lib_PciOfflinePinpad cancel");
         return -1;
     }
-
-    TRACE("EMV ICC R-APDU(%d):", usRespLen);
-    TRACEBUF(aucResp, usRespLen);
-
-    kernel_tlv_new(cbk_buf, 0x7F00, 0, 0);
-    cbk_buf_len = kernel_tlv_add_child(cbk_buf, 0xDF01, usRespLen, aucResp);
-
-    return 0;
-}
-
-static int trans_cbk_total_amount(unsigned char *cbk_buf, unsigned int cbk_buf_len)
-{
-    cbk_buf_len = kernel_tlv_replace(cbk_buf, 0x9F8219, 6,
-                                     (unsigned char *)"\x00\x00\x00\x00\x00\x00");
-    return 0;
-}
-
-static void trans_cbk_get_random(unsigned char *cbk_buf, unsigned int cbk_buf_len)
-{
-    unsigned char *pnode = 0;
-    unsigned char random[128];
-    unsigned int random_len = 4;
-
-    pnode = kernel_tlv_find(cbk_buf, 0x9F8216);
-    if (pnode)
+    else if (ret == -1031) // by pass
     {
-        random_len = kernel_tlv_get_v(pnode)[0];
+        return 0;
     }
 
-    Lib_AlgGetRandom(random, random_len);
+    TRACEBUF(aucPinBlock, sizeof(aucPinBlock));
 
-    cbk_buf_len = kernel_tlv_add_child(cbk_buf, 0x9F37, random_len, random);
+    char acPlainPinAsc[12+1] = {0};
+    memset(acPlainPinAsc, 0, sizeof(acPlainPinAsc));
+    unsigned char ucPinLen = aucPinBlock[0] & 0x0F;
+    Lib_Bcd2Asc(aucPinBlock+1, acPlainPinAsc, ucPinLen/2);
+    if (ucPinLen % 2 != 0)
+    {
+        TRACE("Emv ucPinLen = %d", ucPinLen);
+        Lib_Bcd2Asc(aucPinBlock+1+ucPinLen/2, acPlainPinAsc+ucPinLen-1, 1);
+        acPlainPinAsc[ucPinLen] = 0;
+    }
+
+    TRACE("Emv acPlainPinAsc = %s", acPlainPinAsc);
+    memcpy(offlinePin, acPlainPinAsc, strlen(acPlainPinAsc));
+    // TRACEBUF()
+    return strlen(acPlainPinAsc);
 }
 
-int trans_cbk(void *user_data, unsigned char *cbk_buf, unsigned int cbk_buf_len)
+void _lv_online_pinpad_callback(unsigned char input_count, const unsigned char ucLastTimes)
 {
-    FUN_IN;
-    int ret = 0;
-    unsigned char *node = 0;
-    unsigned char cmd = 0;
+    unsigned char aucInput[13] = {0};
+    memset(aucInput, '*', input_count);
 
-    node = kernel_tlv_find(cbk_buf, 0xDF00);
-    if (node == 0)
+    UIClearRect(0, 0, LCD_MAX_SEG,  MAX_COM_LINES - 1);
+
+    UITextAlign(ALIGN_L, 2, DISP_MODE_NORMAL, "Please enter PIN:");
+
+    UIText(14, 3, DISP_MODE_NORMAL, (void *)aucInput);
+}
+static int input_online_pin(char *pan,unsigned char *pinBlock)
+{
+    pin_param param = { 0 };
+    param.min_input_count = 4;
+    param.max_input_count = 6;
+    param.timeout = 20;
+    param.is_bypass = 1;
+
+    Lib_PciSetPinpadUI(_lv_online_pinpad_callback);
+    int ret = Lib_PciOnlinePinpad(param, 0);
+    TRACE("Emv Lib_PciOnlinePinpad ret = %d", ret);
+    if (ret == -1029)
     {
+        TRACE("Emv Lib_PciOnlinePinpad cancel");
         return -1;
     }
-    cmd = kernel_tlv_get_v(node)[0];
-
-    TRACE("EMV trans cbk, CMD = %02XH", cmd);
-
-    switch (cmd)
+    else if (ret == -1031)
     {
-    case CMD_REQUEST_SAME_CARD_TOTAL_TRANS_AMOUNT:
-        /* cless */
-        break;
-    case CMD_REQUEST_RUPAY_SERVICE_SHORTLISTING:
-        /* cless */
-        break;
-    case CMD_REQUEST_RUPAY_SERVICE_GET_PRMACQ_KEY:
-        /* cless */
-        break;
-    case CMD_REQUEST_DATAEXCHANGEBUFFER:
-        /* not used */
-        break;
-    case CMD_REQUEST_TORN_BUFFER1:
-        /* not used */
-        break;
-    case CMD_REQUEST_STORES_ONLINE_TRANSACTION_CONTEXT: /* cless */
-        // trans_cbk_store_online_data(cbk_buf, cbk_buf_len);
-        break;
-    case CMD_REQUEST_GET_ONLINE_TRANSACTION_CONTEXT: /* cless */
-        // trans_cbk_get_online_data(cbk_buf, cbk_buf_len);
-        break;
-    case CMD_REQUEST_STORES_RECOVERY_CONTEXT:
-        /* cless */
-        break;
-    case CMD_REQUEST_GET_RECOVERY_CONTEXT:
-        /* cless */
-        break;
-    case CMD_REQUEST_STORES_DELAY_AUTH_OUTCOME:
-        /* cless */
-        break;
-    case CMD_AMEX_GET_Dynamic_Limit_Param: /* cless */
-        // ret = trans_cbk_fs_get_drl(cbk_buf, cbk_buf_len);
-        break;
-    case CMD_EMV_CALLBACK_EXCHANGE_APDU: /* contact and cless->icc */
-        ret = trans_cbk_icc_apdu(cbk_buf, cbk_buf_len);
-        break;
-    case CMD_EMV_CALLBACK_DISPLAY_UIRD_MSG:
-        /* not used */
-        break;
-    case CMD_EMV_CALLBACK_GET_AID_PARAM: /* contact and cless->icc */
-    case CMD_REQUEST_AID_PARAM:          /* cless and quics */
-        trans_cbk_fs_get_aid_param(cbk_buf, cbk_buf_len);
-        break;
-    case CMD_EMV_CALLBACK_GET_PUBLIC_KEY: /* contact and cless->icc */
-    case CMD_REQUEST_PKI:                 /* cless and quics */
-        ret = trans_cbk_fs_get_capk(cbk_buf, cbk_buf_len);
-        break;
-    case CMD_EMV_CALLBACK_GET_RANDOM_NUMBER:            /* contact and cless->icc */
-    case CMD_EMV_CALLBACK_GET_ANY_LENGTH_RANDOM_NUMBER: /* contact and cless->icc */
-    case CMD_REQUEST_UNPREDICATABLE_NUMBER:             /* cless and quics */
-        trans_cbk_get_random(cbk_buf, cbk_buf_len);
-        break;
-    case CMD_EMV_CALLBACK_GET_TOTAL_AMOUNT: /* contact and cless->icc */
-        trans_cbk_total_amount(cbk_buf, cbk_buf_len);
-        break;
-    case CMD_EMV_CALLBACK_CHECK_EXCEPTION_FILE: /* contact and cless->icc */
-    case CMD_REQUEST_EXCEPTION_FILE:            /* cless and quics */
-        ret = trans_cbk_fs_get_exception_file(cbk_buf, cbk_buf_len);
-        break;
-    case CMD_EMV_CALLBACK_CHECK_IPK_REVOKE: /* contact and cless->icc */
-    case CMD_REQUEST_PKI_IPK_REVO:          /* cless and quics */
-        // ret = trans_cbk_fs_get_ipk_revoke(cbk_buf, cbk_buf_len);
-        break;
-    case CMD_EMV_CALLBACK_ISSUER_REFERAL:
-        /* contact and cless->icc */
-        break;
-    case CMD_EMV_CALLBACK_PBOC_AUTHENTICATION:
-        /* contact and cless->icc */
-        break;
-    case CMD_EMV_CALLBACK_TRANS_FORCE_ACCEPT:
-        /* contact and cless->icc */
-        break;
-    case CMD_EMV_CALLBACK_GET_PAN_BEFORE_ODA_CUSTOMER:
-        break;
-    case CMD_NOTHING_TO_DO:
-        /* not used */
-        break;
-    case CMD_REQUEST_ICS: /* cless */
-        trans_cbk_fs_get_ics(cbk_buf, cbk_buf_len);
-        break;
-    case CMD_REQUEST_AID_LIST: /* cless */
-        trans_cbk_fs_get_aid_list(cbk_buf, cbk_buf_len);
-        break;
-    case CMD_REQUEST_POWER_ON: /* cless and quics */
-        trans_cbk_power_on();
-        break;
-    case CMD_REQUEST_PDOL_DATA:
-        /* not used */
-        break;
-    case CMD_TRANSACTION_APPROVED:
-        /* not used */
-        break;
-    case CMD_TRANSACTION_ONLINE_REQUEST:
-        /* not used */
-        break;
-    case CMD_TRANSACTION_ADVICE:
-        /* not used */
-        break;
-    case CMD_TRANSACTION_DECLINED:
-        /* not used */
-        break;
-    case CMD_TRANSACTION_TERMINATE:
-        /* not used */
-        break;
-    case CMD_TRANSACTION_ITEM_REQUEST:
-        /* not used */
-        break;
-    case CMD_TRANSACTION_FIELD_OFF: /* cless and quics */
-        trans_cbk_power_off();
-        break;
-    case CMD_CARDHOLDER_CONFIRMATION:
-        /* not used */
-        break;
-    case CMD_GET_TXN_LOG:
-        /* not used */
-        break;
-    case CMD_GET_TOP_UP_LOG:
-        /* not used */
-        break;
-    case CMD_GET_BALANCE:
-        /* not used */
-        break;
-    case CMD_LED_BLINK:
-        /* not used */
-        break;
-    case CMD_TRANSMIT_DEK:
-        /* cless */
-        break;
-    case CMD_TRANSMIT_APDU_KERNEL: /* cless and quics */
-        trans_cbk_nfc_apdu(cbk_buf, cbk_buf_len);
-        break;
-    case CMD_MIR_DATA_EXCHANGE: /* cless */
-        // ret = trans_cbk_mir_data_exchange(cbk_buf, cbk_buf_len);
-        break;
-    case CMD_TIMER_START: /* cless */
-        // trans_cbk_timer_start(cbk_buf, cbk_buf_len);
-        break;
-    case CMD_TIMER_STOP: /* cless */
-        // trans_cbk_timer_stop(cbk_buf, cbk_buf_len);
-        break;
-    case CMD_REQUEST_TORN_BUFFER:
-        /* cless */
-        break;
-    case CMD_WAIT_BY_APP_MS:
-        /* cless */
-    case CMD_CCC_NO_RES:
-        /* cless */
-        break;
-    case CMD_SAVE_RRP_TIME:
-        /* cless */
-        break;
-    case CMD_TRANSMIT_TORN:
-        /* cless */
-        break;
-    case CMD_ICC_REQUEST_AID_LIST: /* icc */
-        trans_cbk_fs_get_bctc_aid_list(cbk_buf, cbk_buf_len);
-        break;
-    case CMD_READER_MAG_DATA: /* not used */
-        // trans_cbk_mag_data(cbk_buf, cbk_buf_len);
-        break;
-    case CMD_OUT_SIGNAL_ENTRYPOINT: /* cless and quics */
-        // trans_cbk_entrypoint_signal(cbk_buf, cbk_buf_len);
-        break;
-    case CMD_PRINT_MSG_DEBUG:
-
-        break;
-    case CMD_CVM_OFFLINE_PIN:              /* not used */
-    case CMD_CVM_ONLINE_PIN:               /* cless */
-    case CMD_EMV_CALLBACK_CVM_OFFLINE_PIN: /* contact and cless->icc */
-    case CMD_EMV_CALLBACK_CVM_ONLINE_PIN:  /* contact and cless->icc */
-    case CMD_EMV_CALLBACK_ONLINE_REQUEST:  /* contact and cless->icc */
-    case CMD_DISPLAY_UIRD_MSG:             /* cless and quics */
-    case CMD_DISPLAY_ICC_MSG:
-    case CMD_EMV_CALLBACK_CARDHOLDER_CONFIRMATION: /* contact and cless->icc */
-    case CMD_NFC_ONLINE_REQUEST:
-    default:
-        app_user_cbk(NULL, cbk_buf, cbk_buf_len);
-        break;
+        return 0;
     }
-    return ret;
-}
 
-void EmvKernelInit()
+    Lib_PciGetPin(KEYID_TPK, (unsigned char *)pan, 0, pinBlock);
+    TRACEBUF(pinBlock, sizeof(pinBlock));
+    return 8;
+}
+static int EmvInputPin(EMV_INPUT_PIN_TYPE cType, char *pan, char *pszPin)
 {
-    FUN_IN;
-    static emv_kernel_alg_t ins_opt_alg;
-    static emv_kernel_std_t ins_opt_std;
-
-    ins_opt_alg.opt_rsa_public_key = app_rsa_public_key;
-    ins_opt_alg.opt_sha1 = app_sha1;
-    ins_opt_alg.opt_des_decrypt = app_des_decrypt;
-    ins_opt_alg.opt_des_encrypt = app_des_encrypt;
-    ins_opt_alg.opt_aes_decrypt = app_aes_decrypt;
-    ins_opt_alg.opt_aes_encrypt = app_aes_encrypt;
-
-    ins_opt_std.opt_memset = app_memset;
-    ins_opt_std.opt_memcpy = app_memcpy;
-    ins_opt_std.opt_memcmp = app_memcmp;
-    ins_opt_std.opt_strlen = app_strlen;
-    ins_opt_std.opt_log = app_log;
-
-    emv_kernel_set_callback(trans_cbk, 0);
-    emv_kernel_set_std(&ins_opt_std);
-    emv_kernel_set_alg(&ins_opt_alg);
+    if(cType == EMV_ONLINEPIN_INPUT)
+        return input_online_pin(pan, (unsigned char *)pszPin);
+    else
+        return input_offline_pin(cType, pszPin);    
 }
 
+static int EmvSelectApp(AidCandidate_t *pList, int listNum)
+{
+    //unsigned char* pnode = 0;
+    //unsigned char* pchild = 0;
+    //unsigned int total = 0;
+    //const unsigned char* option = 0;
+    //char disp[64] = {0};
+    int index = -1;
+
+    UIClearAllScreenLvgl();
+    for(int i = 0; i < listNum; i++)
+    {
+        UITextAlign(ALIGN_L, i, DISP_MODE_NORMAL, (char *)pList[i]._lable);
+    }
+    //60s timeout
+    unsigned int uiTimeout = Lib_SysGetTimer() + 60 * 1000;
+    unsigned char ucKeyDown = KB_NULL;
+    while(Lib_SysGetTimer() < uiTimeout)
+    {
+        ucKeyDown = KbReadKey();
+        if (ucKeyDown == KB_NULL)
+        {
+            continue;
+        }
+
+        if ((KB_DIGIT_ZERO <= ucKeyDown) && (ucKeyDown <= KB_DIGIT_NINE))
+        {
+            index = ucKeyDown - KB_DIGIT_ZERO - 1;
+            break;
+        }
+        else if (ucKeyDown == KB_CLEAR)
+        {
+            index = -1;
+        }
+    }
+
+    TRACE("Emv app user select confirm index = %d", index);
+    return index;
+}
+
+static int EmvProcessDisp(EmvKernelDisp type)
+{
+    UIClearRect(0, 0, LCD_MAX_SEG,  MAX_COM_LINES - 1);
+    switch (type)
+	{
+	case EMV_DISP_READING_CARD:
+        UITextAlign(ALIGN_L, 2, DISP_MODE_NORMAL, "Card reading...");
+		break;
+	case EMV_DISP_SEE_PHONE:
+		UITextAlign(ALIGN_L, 2, DISP_MODE_NORMAL,(char*)"Please check your phone");
+		Lib_DelayMs(5000);
+		break;
+	case EMV_DISP_REMOVE_CARD:
+		UITextAlign(ALIGN_L, 2, DISP_MODE_NORMAL,(char*)"Please remove card");
+		break;
+	case EMV_DISP_NFC_RETAP:
+		UITextAlign(ALIGN_L, 2, DISP_MODE_NORMAL,(char*)"Please retap card");
+		break;
+	case EMV_DISP_OFFLINE_PIN_BLOCKED:
+		UITextAlign(ALIGN_L, 2, DISP_MODE_NORMAL,(char*)"Offline PIN Blocked");
+		Lib_DelayMs(5000);
+		break;	
+	default:
+		break;
+	}
+	return 0;
+}
+
+void disp_online_process()
+{
+    UIClearRect(0, 0, LCD_MAX_SEG,  MAX_COM_LINES - 1);
+    UITextAlign(ALIGN_L, 2, DISP_MODE_NORMAL,(char*)"Online Processing...");
+}
+int onlineProcess(EmvOnlineData_t* pOnlineData){
+
+    FUN_IN;
+    TRACE("start onlineProcess");
+    disp_online_process();
+    memcpy(pOnlineData->iccResponse,"00",2);
+	// memcpy(pOnlineData->ackdata,"\x91\x0A\xD1\x7F\x1E\x5F\x93\xD7\x12\xC0\x30\x30\x71\x12\x9F\x18\x04\xCA\xFE\x00\x01\x86\x09\x84\x24\x00\x00\x04\x15\x49\x9D\x67",32);
+	// pOnlineData->ackdatalen = 32;
+
+	// memcpy(pOnlineData->ackdata,"\x91\x10\x0D\xFA\x99\xD3\x80\x80\x40\x00\xFF\xFE\x00\x00\x00\x00\x10\x00",18);
+	// pOnlineData->ackdatalen = 18;
+		Lib_DelayMs(3000);
+   
+    return 0;
+}
+
+static void Initialize_EMV_CallBackFun(EmvCallBack_t *pcallbackfun)
+{
+	pcallbackfun->EMV_AidSelect = EmvSelectApp;
+	pcallbackfun->EMV_SetKernelId = NULL;
+	pcallbackfun->EMV_ConfirmCardInfo = NULL;
+	pcallbackfun->EMV_InputPasswd = EmvInputPin;
+	pcallbackfun->EMV_CertConfirm = NULL;
+	pcallbackfun->EMV_ProcessDisp = EmvProcessDisp;
+	pcallbackfun->EMV_OnlineProcess = onlineProcess;
+	pcallbackfun->EMV_AfterSelectApp = NULL;
+	pcallbackfun->EMV_AfterReadRecord = NULL;
+}
+
+void EmvL2_Init(){
+    EmvCallBack_t t_callbackfun;
+    Initialize_EMV_CallBackFun(&t_callbackfun);
+    Emv_KernelInit(t_callbackfun);
+}
+
+void disp_result(int resultType,char *szResult)
+{
+    // UIClearRect(0, 0, LCD_MAX_SEG,  MAX_COM_LINES - 1);
+    // UITextAlign(ALIGN_L, 2, DISP_MODE_NORMAL, szResult);
+    // LvUiWaitKey(3000);
+
+    LVGL_RESULT result = { 0 };
+    result.timeout = 3000;
+    result.msg = (char *)szResult;
+
+    if(resultType)
+    {
+        result.img = SUCCESS_IMG;
+        result.title = TIP_SUCCESS;
+        result.fontColor = LV_COLOR_GREEN;
+    }
+    else
+    {
+        result.img = FAILURE_IMG;
+        result.title = TIP_FAILURE;
+        result.fontColor = LV_COLOR_RED;
+    }
+    LvUiShowResult(&result);
+}
 short EmvDemo(short cardMode, ST_TRANSDATA *pstTransData)
 {
     FUN_IN;
-    unsigned char trans_data[2048] = {0};
-    unsigned int trans_data_len = 0;
+    int ret = -1;
+    EMV_L2_Return nEmvRet = APP_RC_EMV_DENAIL;
+    EmvL2_Init();
+    memcpy(pstTransData->trans_amount,"000000010000",12);
+    pstTransData->cardDetectType = cardMode;
+    pstTransData->trans_type = EMV_L2_SALE;
+    nEmvRet = Emv_Process(pstTransData);//emv_kernel_start(trans_data, trans_data_len);
 
-    memcpy(trans_data, (unsigned char *)"\xFF\x00\x3D\x9F\x02\x06\x00\x00\x08\x88\x88\x00\x9F\x03\x06\x00\x00\x00\x00\x00\x00\x81\x04\x00\x00\x00\x00\x9F\x04\x04\x00\x00\x00\x00\x5F\x2A\x02\x01\x70\x9C\x01\x00\x9A\x03\x24\x01\x18\x9F\x21\x03\x01\x20\x47\x9F\x37\x04\x93\x64\xFA\x26\xDF\x30\x01\x01", 64); // DF30, card type: 1,nfc; 2,ic; 3,mag; 0,unknow
-    trans_data_len = 64;
-
-    EmvKernelInit();
-    s_emv_card_mode = cardMode;
-    int ret = emv_kernel_start(trans_data, trans_data_len);
-    if (ret == -1)
+    if(cardMode == NFC_DETECETED && nEmvRet == APP_RC_COMPLETED)
     {
-        ret = emv_kernel_error();
-        TRACE("EMV kernel start fail, ret = %d", ret);
-        return ret;
+		// do contactless trans online request
+		EmvOnlineData_t emvOnlineData;
+		memset(&emvOnlineData,0,sizeof(EmvOnlineData_t));
+		ret = onlineProcess(&emvOnlineData);
+		if(ret == 0 && memcmp(emvOnlineData.iccResponse,"00",2) == 0)
+		{
+			if(Emv_CheckContactlessDoubleTap(&emvOnlineData))
+				ret = Emv_SetContactlessOnlineResult(&emvOnlineData);
+            if(ret == 0)
+                nEmvRet = APP_RC_COMPLETED;
+            else
+                nEmvRet = APP_RC_EMV_DENAIL;
+		}
+        else
+        {
+            nEmvRet = APP_RC_EMV_DENAIL;
+        }
     }
+
+    switch(nEmvRet)
+    {
+        case APP_RC_COMPLETED:
+            disp_result(1,"Trans Success");
+            break;
+        case APP_RC_TERMINAL:
+        case APP_RC_NFC_TERMINAL:
+            disp_result(0,"Trans Terminal");
+            break;
+        case APP_RC_CANCEL:
+            disp_result(0,"Trans Cancel");
+            break;
+        case APP_RC_EMV_APP_BLOCK:
+            disp_result(0,"App Block");   
+            break;
+        case APP_RC_EMV_DENAIL:
+            disp_result(0,"Trans Denail");
+            break;
+        case APP_RC_CARD_NOT_SUPPORT:
+            disp_result(0,"Card Not Support");
+            break;
+        case APP_RC_EMV_TRANS_TRY_ANOTHER_INTERFACE:
+            disp_result(0,"Trans Try Another Interface");
+            break;
+        case APP_RC_NFC_TRY_AGAIN:
+            disp_result(0,"NFC Try Again");
+            break;
+        case APP_RC_TRANS_REVERSEL:
+            //start reversel process
+            disp_result(0,"Pls start reversel process");
+            break;
+        default:
+            disp_result(0,"Trans Fail");
+            break;
+    }
+
+    // const char *str_version = emv_kernel_get_version();
+    // TRACE("EMV get version: %s", str_version);
+    if(nEmvRet == APP_RC_COMPLETED)
+        ret = 0;
     else
-    {
-        trans_data_len = ret;
-
-        TRACE("EMV kernel  start end, trans len = %d", trans_data_len);
-        TRACEBUF(trans_data, trans_data_len);
-    }
-
-    const char *str_version = emv_kernel_get_version();
-    TRACE("EMV get version: %s", str_version);
-
-    return RET_OK;
+        ret = -1;    
+    return ret;
 }
 
 // valide data

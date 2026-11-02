@@ -6,7 +6,7 @@
  * Description   : Implement WiFi management related functions
  **********************************************************************************************************/
 
-#include "WifiConfig.h"
+#include "WiFiConfig.h"
 #include "LibApi.h"
 #include "Common.h"
 #include "MessageBox.h"
@@ -732,7 +732,11 @@ short UIWifiNetList(int iTimeout)
             image = lv_img_create(btn[i]);
 
             memset((char*)&stCtrlObjAttr, 0x00, sizeof(stCtrlObjAttr));
+#ifdef HW_D30R
+            stCtrlObjAttr.m_usHeight = parentHeight / 15;
+#else
             stCtrlObjAttr.m_usHeight = parentHeight / 8;
+#endif
             stCtrlObjAttr.m_stPadAttr.m_usBottom = stCtrlObjAttr.m_usHeight / 8;
             stCtrlObjAttr.m_stPadAttr.m_usLeft = stCtrlObjAttr.m_usHeight / 8;
             stCtrlObjAttr.m_stPadAttr.m_usRight = stCtrlObjAttr.m_usHeight / 8;
@@ -951,6 +955,45 @@ static short UIWifiLinkActNoCofig(unsigned int iTimeout, unsigned char *pucSsid,
         Lib_WifiConnectAp((unsigned char *)"WPA", (unsigned char *)"NONE", (char *)pucSsid, pucPwd);
     }
     uiStartTime = Lib_SysGetTimer();
+#ifdef HW_D30R
+    lv_obj_t *mask = lv_obj_create(lv_scr_act());
+    lv_obj_set_size(mask, LV_PCT(100), LV_PCT(100));
+    lv_obj_set_pos(mask, 0, 0);
+    lv_obj_set_style_bg_opa(mask, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(mask, 0, 0);
+    lv_obj_set_style_pad_all(mask, 0, 0);
+    lv_obj_clear_flag(mask, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_flag(mask, LV_OBJ_FLAG_CLICKABLE);
+
+    lv_obj_t *img = NULL;
+    img = lv_gif_create(mask);
+    lv_gif_set_src(img, WIFICONNECTTING_GIF);
+    lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
+
+    WIFI_INF wifiInfo = { 0 };
+    while (1)
+    {
+        sRC = GetLinkWifi(&wifiInfo);
+        if ((RET_OK == sRC) || (RET_ERR_TIMEOUT == sRC))
+        {
+            break;
+        }
+        if (KB_CANCEL == LvUiWaitKey(50))
+        {
+            // escape/cancel key
+            lv_obj_del(mask);
+            return UI_INPUT_CANCEL;
+        }
+
+        if ((NET_EXEC_TIMEOUT == sRC) || (IS_TIME_OUT(uiStartTime, WIFI_SET_NET_TIMEOUT)))
+        {
+            lv_obj_del(mask);
+            // timeout
+            return RET_ERR_TIMEOUT;
+        }
+    }
+    lv_obj_del(mask);
+#else
     lv_obj_t * img = NULL;
     img = lv_gif_create(lv_scr_act());
     lv_gif_set_src(img, WIFICONNECTTING_GIF);
@@ -979,7 +1022,7 @@ static short UIWifiLinkActNoCofig(unsigned int iTimeout, unsigned char *pucSsid,
         }
     }
     lv_obj_del(img);
-
+#endif
     TRACE("UIWifiLinkActNoCofig src:%d", sRC);
     if (RET_OK == sRC)
     {
@@ -1012,6 +1055,7 @@ static short UIWifiLinkActNoCofig(unsigned int iTimeout, unsigned char *pucSsid,
 //-----------------------------------------------------------------------------
 static short UIWifiLinkAct(unsigned int iTimeout, WIFI_INF wifiInfo)
 {
+#ifndef HW_D30R
     short sRC;
     char acDisBuff[128] = {0};
 
@@ -1029,7 +1073,7 @@ static short UIWifiLinkAct(unsigned int iTimeout, WIFI_INF wifiInfo)
             return sRC;
         }
     }
-
+#endif
     return UIWifiLinkActNoCofig(iTimeout, wifiInfo.m_ausSSID, strlen((const char *)wifiInfo.m_ausSSID),
         wifiInfo.m_aucPass, strlen((const char *)wifiInfo.m_aucPass), wifiInfo.m_aucEncryptType);
 }
@@ -1100,6 +1144,9 @@ static short UIWifiSelectNet(int iTimeout, WIFI_INF wifiInfo)
                     strcpy((char *)aucPwd, lv_textarea_get_text(textArea));
                     usPwdLen = strlen((const char *)aucPwd);
                     memcpy(wifiInfo.m_aucPass, aucPwd, usPwdLen + 1);
+#ifdef HW_D30R
+                    lv_obj_del(body);
+#endif
                 }
 
                 sRC = UIWifiLinkAct(WIFI_INPUT_TIMEOUT, wifiInfo);
@@ -1109,7 +1156,9 @@ static short UIWifiSelectNet(int iTimeout, WIFI_INF wifiInfo)
                 }
                 else
                 {
+#ifndef HW_D30R
                     lv_obj_del(body);
+#endif
                     break;
                 }
             }

@@ -206,6 +206,7 @@
 #define TIP_CONFIRM_AMOUNT                      (char *)(Lib_XmlCvtIdToStr(ID_TIP_CONFIRM_AMOUNT))
 #define TIP_PAY_BY_CARD                         (char *)(Lib_XmlCvtIdToStr(ID_TIP_PAY_BY_CARD))
 #define TIP_PULL_OUT_CARD                       (char *)(Lib_XmlCvtIdToStr(ID_TIP_PULL_OUT_CARD))
+#define TIP_NFC_MULTI_CARDS                     (char *)(Lib_XmlCvtIdToStr(ID_TIP_NFC_MULTI_CARDS))
 #define TIP_RECORDS_FULL                        (char *)(Lib_XmlCvtIdToStr(ID_TIP_RECORDS_FULL))
 #define TIP_QR_TRADE_SUCC                       (char *)(Lib_XmlCvtIdToStr(ID_TIP_QR_TRADE_SUCC))
 

@@ -786,6 +786,15 @@ short SearchCard(char *title)
 		{
 			continue;
 		}
+		else if (NFC_COLLISION == sRC)
+		{
+			BeepOn();
+            lv_obj_del(img);
+            LvUilCls();
+			sRC = RET_ERR;
+			cardMode = NFC_COLLISION;
+			goto QUIT;
+		}
 		else if((MSC_DETECETED != sRC) && (SCI_DETECETED != sRC) && (NFC_DETECETED != sRC))
 		{
 			continue;
@@ -850,6 +859,11 @@ QUIT:
     if (NFC_DETECETED == cardMode)
     {
         Lib_PiccClose();
+    }
+
+	if (NFC_COLLISION == cardMode)
+    {
+        MessageBox((char*)TIP_NFC_MULTI_CARDS, MB_CENTER|MB_COLOR_RED, 3000);
     }
     FUN_OUT;
 

@@ -64,8 +64,5 @@ extern u8 Sam3DesNoRandomEncript(u8 *pucPlaintext, u8 *pucCiphertext, u16 ucText
 extern u8 Se3DesProcess(u8 ucP1_KeyID, u8 ucP2_EnOrDe, u8 *pucInBuf, u8 ucInBufLen, u8 *pucOutBuf);
 extern u8 DataEncryptProcess(u8 *pucSourceBuf, u8 *pucDestBuf, u16 usSourceLen, u8 ucKeyID);
 extern u8 VANCalcMac(u8 *key, u8 *inputData, u16 inputDataLen, u8 *outputData);
-extern u8 SetAlgorithmMode(u8 mode);
-extern u8 SetEcbOrCbcMode(u8 mode);
-extern u8 SetCipherInitializationVector(u8 *IV);
 extern u8 GetRandom(u8 *pucRecv, u8 *pucRandom, u8 *pucRandomNum);
 #endif

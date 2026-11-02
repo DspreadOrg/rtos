@@ -10,7 +10,7 @@
 #include "LibApi.h"
 #include "Mqtt.h"
 #include "Drv.h"
-#include "key.h"
+#include "Key.h"
 #include "LibSysapi.h"
 #include "Communication.h"
 #include "Power.h"
@@ -101,7 +101,7 @@ int GetMqttInfo(Mqtt_Para_t *para)
         return ret;
     }
 
-    //MQTT connects the five elements hostname£¬port£¬clientid£¬username£¬password
+    //MQTT connects the five elements hostnameï¼Œportï¼Œclientidï¼Œusernameï¼Œpassword
     TRACE_LOG("GetMqttInfo hostname = %s", signout.hostname);
     TRACE_LOG("GetMqttInfo port = %d", signout.port);
     TRACE_LOG("GetMqttInfo clientid = %s", signout.clientid);
@@ -149,7 +149,7 @@ int GetMqttInfo(Mqtt_Para_t *para)
     //int len = 0;
     int ret = RET_ERR;
 
-	//MQTT connects the five elements hostname£¬port£¬clientid£¬username£¬password
+	//MQTT connects the five elements hostnameï¼Œportï¼Œclientidï¼Œusernameï¼Œpassword
     TRACE_LOG("GetMqttInfo hostname = %s", g_stMqttServerParam.aucMqttHostName1);
     TRACE_LOG("GetMqttInfo port = %s", g_stMqttServerParam.aucPort1);
     TRACE_LOG("GetMqttInfo clientid = %s", g_stCustomServerParam.aucClientID);
@@ -472,7 +472,7 @@ static void CustomServerDefaultParam(void)
 // Name: CustomServerParamInit
 // Function: Initialization of customized server parameters
 // Parameters:
-// Return£º
+// Returnï¼š
 // Instructions:
 //-----------------------------------------------------------------------------
 short CustomServerParamInit(void)
@@ -497,7 +497,7 @@ static void MqttServerDefaultParam(void)
 // Name: MqttServerParamInit
 // Function: The MQTT server parameter information is initialized
 // Parameters:
-// Return£º
+// Returnï¼š
 // Instructions:
 //-----------------------------------------------------------------------------
 short MqttServerParamInit(void)
@@ -513,7 +513,7 @@ short MqttServerParamInit(void)
 // Name: Mqtt_KeepOnLine_Task
 // Function: The mqtt connection task ensures that the mqtt server is connected
 // Parameters:
-// Return£º
+// Returnï¼š
 // Instructions:
 //-----------------------------------------------------------------------------
 int Mqtt_KeepOnLine_Task(void *arg)
@@ -742,7 +742,7 @@ int Mqtt_KeepOnLine_Task(void *arg)
 // Name: Mqtt_Msg_Task
 // Function: The message is received, parsed, and broadcast
 // Parameters:
-// Return£º
+// Returnï¼š
 // Instructions:
 //-----------------------------------------------------------------------------
 int Mqtt_Msg_Task(void *arg)
@@ -782,7 +782,7 @@ void MqttScriTimeoutProcess(void)
 // Name: Mqtt_GetConnectInfo_Task
 // Function: Gets the information needed to connect to the MQTT service
 // Parameters:
-// Return£ºReturn success flag
+// Returnï¼šReturn success flag
 // Instructions:
 //-----------------------------------------------------------------------------
 int Mqtt_GetConnectInfo_Task(void *arg)
@@ -800,7 +800,7 @@ int Mqtt_GetConnectInfo_Task(void *arg)
 // Name: Mqtt_ReadMsg
 // Function: Read mqtt data and put it in a loop queue
 // Parameters: Length of data in the queue
-// Return£º
+// Returnï¼š
 // Instructions:
 //-----------------------------------------------------------------------------
 static int Mqtt_ReadMsg(CBuff_t *msg_buff)
@@ -898,7 +898,7 @@ int Mqtt_GetStates(MQTT_STATE_ID eId)
 //              user:       indicates the user name
 //              password:   indicates the password
 //              ping_time:  indicates the automatic ping time
-// Return£º
+// Returnï¼š
 // Instructions:
 //-----------------------------------------------------------------------------
 int Mqtt_Connect(char *server, unsigned short port, char *cid, char *user, char *password, int keepalive, int cleansession)
@@ -952,7 +952,7 @@ int Mqtt_Connect(char *server, unsigned short port, char *cid, char *user, char 
 // Name: Mqtt_Disconnect
 // Function: The MQTT disconnects
 // Parameters:
-// Return£º
+// Returnï¼š
 // Instructions:
 //-----------------------------------------------------------------------------
 int Mqtt_Disconnect(void)
@@ -966,10 +966,10 @@ int Mqtt_Disconnect(void)
 }
 
 //-----------------------------------------------------------------------------
-// name£ºMqtt_Subscribe
+// nameï¼šMqtt_Subscribe
 // Function: MQTT Subscription
 // Parameters:  topic: The topic
-// Return£º
+// Returnï¼š
 // Instructions:
 //-----------------------------------------------------------------------------
 int Mqtt_Subscribe(char *topic)
@@ -987,7 +987,7 @@ int Mqtt_Subscribe(char *topic)
 // Name: Mqtt_Unsub
 // Function: MQTT unsubscribe
 // Parameters:  topic: The topic
-// Return£º
+// Returnï¼š
 // Instructions:
 //-----------------------------------------------------------------------------
 int Mqtt_Unsub(char *topic)
@@ -1001,7 +1001,7 @@ int Mqtt_Unsub(char *topic)
 // Parameters:  topic:   indicates the topic
 //              data:   data buff
 //              len:    indicates the data length
-// Return£º
+// Returnï¼š
 // Instructions:
 //-----------------------------------------------------------------------------
 int Mqtt_Pub(char *topic, unsigned char *data, int len)
@@ -1014,7 +1014,7 @@ int Mqtt_Pub(char *topic, unsigned char *data, int len)
 // Function: MQTT receives messages for subscriptions
 // Parameters:  pucBuf: indicates the receiving length
 //              pusLen: Input receive buff length, output actual length
-// Return£º
+// Returnï¼š
 // Instructions:
 //-----------------------------------------------------------------------------
 int Mqtt_Recv(unsigned char *pucBuf, unsigned short *pusLen)
@@ -1047,7 +1047,7 @@ void MqttSetTaskStatus(bool status)
 // Name: MqttTask
 // Function: MQTT duty inlets
 // Parameters:
-// Return£º
+// Returnï¼š
 // Instructions:
 //-----------------------------------------------------------------------------
 int MqttTask(void *arg)
@@ -1190,20 +1190,20 @@ short UIOnlineMQTT(int iTimeout)
 
 int MqttTaskDeinit(void)
 {
-    // ÔİÍ£ÈÎÎñµ÷¶È
+    // æš‚åœä»»åŠ¡è°ƒåº¦
     MqttSetTaskStatus(FALSE);
     Lib_DelayMs(1);
 
-    // ¶Ï¿ªµ±Ç°MQTTÁ¬½Ó
+    // æ–­å¼€å½“å‰MQTTè¿æ¥
     Mqtt_Disconnect();
 
-    // ²ÎÊı³õÊ¼»¯×´Ì¬±êÖ¾ÖØÖÃ
+    // å‚æ•°åˆå§‹åŒ–çŠ¶æ€æ ‡å¿—é‡ç½®
     s_mqtt_para.init_flag = FALSE;
 
-    // MQTT¹¤×÷×´Ì¬»úÖØÖÃ
+    // MQTTå·¥ä½œçŠ¶æ€æœºé‡ç½®
     step = MQTT_STEP_DETECT_NET;
 
-    // »Ö¸´ÈÎÎñµ÷¶È
+    // æ¢å¤ä»»åŠ¡è°ƒåº¦
     MqttSetTaskStatus(TRUE);
 
     return RET_OK;

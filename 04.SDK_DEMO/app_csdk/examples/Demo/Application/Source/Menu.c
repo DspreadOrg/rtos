@@ -7,7 +7,7 @@
  **********************************************************************************************************/
 
 #include "Menu.h"
-#include "LibSysApi.h"
+#include "LibSysapi.h"
 #include "Language.h"
 #include "Drv.h"
 #include "Trade.h"
@@ -83,10 +83,10 @@ void LvHomeMenu(void *p)
 
     //Customize the status bar
     LvUiCreateStatusBarTask(LvStatusBarCb);
-
+#ifndef HW_D30R     // for demo use only
     //Check TMS for tasks that need to be upgraded
     TmsAutoUpgrade(60*1000);
-
+#endif
     Lib_osiThreadCreate("nettask", (osiThreadEntry_t)Net_StartChannelThread, NULL, OSI_PRIORITY_NORMAL, (unsigned int)32*1024, 0);
 
 #if defined(MQTT_SUPPORT)
@@ -100,15 +100,20 @@ void LvHomeMenu(void *p)
         LvUilCls();
 
         Lib_LcdParaGet(&w, &h, &font, &forecolor, &backcolor);
-
+#ifndef HW_D30R
         LvUiShowImage(0, -LvUiGetStatusBarHeight(), &img, -1);
+#endif
         LvUiText(LVGL_ALIGN_CENTER, 0, 127, FONT_SIZE_SMALL, acTemp, (lv_color_t)forecolor);
 
         DispMainTimeSet(1);
         key = LvUiWaitKey(30 * 1000);
         DispMainTimeSet(0);
 
-        if (key == KB_ENTER || (1 == key))
+        if (key == KB_ENTER || (1 == key)
+#ifdef HW_D30R
+            || (key == KB_CLEAR) || (key == KB_UP) || (key == KB_DOWN)
+#endif
+            )
         {
             // close status bar
             LvUiCtrlStatusBar(0);
@@ -119,9 +124,6 @@ void LvHomeMenu(void *p)
             LvUiCtrlStatusBar(1);
             LvUilCls();
             key = KB_NULL;
-        }
-        else if ( key == KB_CANCEL )
-        {
         }
     }
 }
@@ -1644,7 +1646,9 @@ static short UINetParaCfg(int iTimeout)
     {
         return RET_ERR;
     }
-
+#ifdef HW_D30R
+    lv_obj_t *kb = LvUiCreateInputKeyboard(NULL, LV_KEYBOARD_MODE_TEXT_LOWER);
+#endif
     while (1)
     {
         sprintf((char *)displayBuff, "%s [%d/%d]", TIP_POSP_CFG, i + 1, ucTotalItems);
@@ -1655,6 +1659,9 @@ static short UINetParaCfg(int iTimeout)
         {
         case LVGL_OPER_TIMEOUT :
         case KB_CANCEL :
+#ifdef HW_D30R
+            lv_obj_del(kb);
+#endif
             return sRC;
 
         case KB_UP :
@@ -1678,7 +1685,9 @@ static short UINetParaCfg(int iTimeout)
             break;
         }
     }
-
+#ifdef HW_D30R
+    lv_obj_del(kb);
+#endif
     return sRC;
 }
 
@@ -1701,12 +1710,14 @@ static short UITmsParaCfg(int iTimeout)
 
     ucTotalItems = sizeof(aUiFun) / sizeof(UI_FUN);
 
-    if(ucTotalItems == 0)
+    if (ucTotalItems == 0)
     {
         return RET_ERR;
     }
-
-    while(1)
+#ifdef HW_D30R
+    lv_obj_t *kb = LvUiCreateInputKeyboard(NULL, LV_KEYBOARD_MODE_TEXT_LOWER);
+#endif
+    while (1)
     {
         sprintf((char *)displayBuff, "%s [%d/%d]", TIP_TMS_CFG, i + 1, ucTotalItems);
 
@@ -1716,6 +1727,9 @@ static short UITmsParaCfg(int iTimeout)
         {
         case LVGL_OPER_TIMEOUT :
         case KB_CANCEL :
+#ifdef HW_D30R
+            lv_obj_del(kb);
+#endif
             return sRC;
 
         case KB_UP :
@@ -1739,7 +1753,9 @@ static short UITmsParaCfg(int iTimeout)
             break;
         }
     }
-
+#ifdef HW_D30R
+    lv_obj_del(kb);
+#endif
     return sRC;
 }
 
@@ -1756,12 +1772,14 @@ static short UITmsModuleParaCfg(int iTimeout)
 
     ucTotalItems = sizeof(aUiFun) / sizeof(UI_FUN);
 
-    if(ucTotalItems == 0)
+    if (ucTotalItems == 0)
     {
         return RET_ERR;
     }
-
-    while(1)
+#ifdef HW_D30R
+    lv_obj_t *kb = LvUiCreateInputKeyboard(NULL, LV_KEYBOARD_MODE_TEXT_LOWER);
+#endif
+    while (1)
     {
         sprintf((char *)displayBuff, "%s [%d/%d]", MENU_TMS_OTHER_SERVER, i + 1, ucTotalItems);
 
@@ -1771,6 +1789,9 @@ static short UITmsModuleParaCfg(int iTimeout)
         {
         case LVGL_OPER_TIMEOUT :
         case KB_CANCEL :
+#ifdef HW_D30R
+            lv_obj_del(kb);
+#endif
             return sRC;
 
         case KB_UP :
@@ -1794,7 +1815,9 @@ static short UITmsModuleParaCfg(int iTimeout)
             break;
         }
     }
-
+#ifdef HW_D30R
+    lv_obj_del(kb);
+#endif
     return sRC;
 }
 
@@ -1813,13 +1836,28 @@ static short UITmsModuleParaCfg(int iTimeout)
 //-----------------------------------------------------------------------------
 short UISetPospServerMode(int iTimeout)
 {
-
-    return UISetParaByTextAreaInfoInput(TIP_POSP_MODE_SETTING, TIP_IS_USE_DOMAIN, POSP_SERVER_MODE_BIT, LVGL_INPUT_MODE_NUM, SERVER_MODE_SIZE, iTimeout);
+    short ret;
+#ifdef HW_D30R
+    lv_obj_t *kb = LvUiCreateInputKeyboard(NULL, LV_KEYBOARD_MODE_TEXT_LOWER);
+#endif
+    ret = UISetParaByTextAreaInfoInput(TIP_POSP_MODE_SETTING, TIP_IS_USE_DOMAIN, POSP_SERVER_MODE_BIT, LVGL_INPUT_MODE_NUM, SERVER_MODE_SIZE, iTimeout);
+#ifdef HW_D30R
+    lv_obj_del(kb);
+#endif
+    return ret;
 }
 
 short UISetTmsServerMode(int iTimeout)
 {
-    return UISetParaByTextAreaInfoInput(TIP_TMS_MODE_SETTING, TIP_IS_USE_DOMAIN, TMS_SERVER_MODE_BIT, LVGL_INPUT_MODE_NUM, SERVER_MODE_SIZE, iTimeout);
+    short ret;
+#ifdef HW_D30R
+    lv_obj_t *kb = LvUiCreateInputKeyboard(NULL, LV_KEYBOARD_MODE_TEXT_LOWER);
+#endif
+    ret = UISetParaByTextAreaInfoInput(TIP_TMS_MODE_SETTING, TIP_IS_USE_DOMAIN, TMS_SERVER_MODE_BIT, LVGL_INPUT_MODE_NUM, SERVER_MODE_SIZE, iTimeout);
+#ifdef HW_D30R
+    lv_obj_del(kb);
+#endif
+    return ret;
 }
 
 static short UITmsServerCfg(int timeout)
@@ -2421,16 +2459,8 @@ Result:
 //-----------------------------------------------------------------------------
 static short UIPrintTest(int timeout)
 {
-    static unsigned char printGrade = 0;
-    unsigned char ucCurGrade = Lib_PrnGetGrade();
+    PrintTest();
 
-    printGrade++;
-    if (printGrade > PT_PRINT_GRADE_MAX)
-        printGrade = 1;
-    Lib_PrnSetGrade(printGrade);
-    PrintReceipt();
-
-    Lib_PrnSetGrade(ucCurGrade);
     return RET_OK;
 }
 #endif
@@ -2469,10 +2499,10 @@ void mainMenu(int iTimeout)
         Lib_PrintfHeapInfo();
 
         LvUilCls();
-
+#ifndef HW_D30R
         img.bgImg = (char *)MAINBG_IMG;
         LvUiShowImage(MENU_COMMON_BACKGROUND_OFF_X, MENU_COMMON_BACKGROUND_OFF_Y, &img, -1);
-
+#endif
         img.bgImg = (char *)CONSUME_ICON;
         LvUiShowImage(MENU_LEVEL_ONE_COLUMN_ONE_OFF_X, MENU_LEVEL_ONE_LINE_ONE_OFF_Y, &img, KB_DIGIT_ONE);
 
@@ -2512,7 +2542,7 @@ void mainMenu(int iTimeout)
         {
         case KB_DIGIT_ONE:
             UIConsume(iTimeout);
-            DisplayDisEnbleIC();
+            // DisplayDisEnbleIC();
             break;
 
         case KB_DIGIT_TWO:
@@ -2625,7 +2655,9 @@ int UIFuntionSlider(char *title, unsigned char ucMax, E_SliderFuntionType funtio
     valueLabel = lv_label_create(page);
     slider = lv_slider_create(page);
     labelTip = lv_label_create(page);
-
+#ifdef HW_D30R
+    LvUiCreatebtn(page);
+#endif
     //set labelTitle
     stCtrlObjAttr.m_stTextAttr.m_pcTextContent = title;
     stCtrlObjAttr.m_stTextAttr.m_textLongMode = LV_LABEL_LONG_WRAP;
@@ -2672,7 +2704,11 @@ int UIFuntionSlider(char *title, unsigned char ucMax, E_SliderFuntionType funtio
     stCtrlObjAttr.m_align = LV_ALIGN_TOP_MID;
     stCtrlObjAttr.m_y = parentHeight / 8 * 5;
     stCtrlObjAttr.m_usWidth = parentWidth / 16 * 11;
+#ifdef HW_D30R
+    sliderHeight = parentWidth / 12;
+#else
     sliderHeight = parentHeight / 12;
+#endif
     stCtrlObjAttr.m_usHeight = sliderHeight;
     stCtrlObjAttr.m_stBgAttr.m_ucOpa = LV_OPA_100;
     stCtrlObjAttr.m_stBgAttr.m_color = LV_COLOR_SILVER;
@@ -2862,7 +2898,9 @@ static short UISetTime(char *title, unsigned int minTime, unsigned int maxTime, 
     rangeEndLabel = lv_label_create(arc);
     unitLabel = lv_label_create(arc);
     textArea = lv_textarea_create(arc);
-
+#ifdef HW_D30R
+    LvUiCreatebtn(page);
+#endif
     //set titleLabel
     stCtrlObjAttr.m_stTextAttr.m_pcTextContent = title;
     stCtrlObjAttr.m_stTextAttr.m_textLongMode = LV_LABEL_LONG_WRAP;
@@ -2897,8 +2935,13 @@ static short UISetTime(char *title, unsigned int minTime, unsigned int maxTime, 
     stCtrlObjAttr.m_stArcAttr.m_bRoundedMode = true;
     stCtrlObjAttr.m_align = LV_ALIGN_CENTER;
     stCtrlObjAttr.m_y = parentHeight / 12;
+#ifdef HW_D30R
+    stCtrlObjAttr.m_usWidth = parentWidth / 12 * 7;
+    stCtrlObjAttr.m_usHeight = parentWidth / 12 * 7;
+#else
     stCtrlObjAttr.m_usWidth = parentHeight / 12 * 7;
     stCtrlObjAttr.m_usHeight = parentHeight / 12 * 7;
+#endif
     stCtrlObjAttr.m_stBorderAttr.m_usWidth = 1;
     stCtrlObjAttr.m_stBorderAttr.m_ucOpa = LV_OPA_40;
     stCtrlObjAttr.m_stBorderAttr.m_color = LV_COLOR_BLACK;
@@ -3034,6 +3077,10 @@ static short UISetTime(char *title, unsigned int minTime, unsigned int maxTime, 
                         return RET_ERR;
                     }
                 }
+#ifdef HW_D30R
+                LvUiMessageBox(TIP_SET_SUCC, MB_CENTER|MB_COLOR_GREEN, NULL, 3000);
+                return RET_OK;
+#endif
             }
             else
             {
