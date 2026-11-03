@@ -14,6 +14,7 @@
 #include "Communication.h"
 #include "CardTrade.h"
 #include "api_lvgl.h"
+#include "Card.h"
 
 #include "EmvUtils.h"
 #include "app_emv.h"
@@ -2470,7 +2471,6 @@ EMV_L2_Return Emv_Process(ST_TRANSDATA *pstTransData)
 }
 
 static unsigned char tagValue[256] = {0};
-#if 0
 unsigned char* Emv_GetCoreData(unsigned int tagname, int *pvallen)
 {
     //u32 len=0;
@@ -2483,7 +2483,7 @@ unsigned char* Emv_GetCoreData(unsigned int tagname, int *pvallen)
     if(pTransactionPool == NULL)
         return 0;
 
-    pNode = kernel_tlv_find_(pTransactionPool,tagname);
+    pNode = kernel_tlv_find(pTransactionPool,tagname);
 	if(pNode != NULL && kernel_tlv_get_l(pNode) != 0)
     {
 	    *pvallen=kernel_tlv_get_l(pNode);
@@ -2503,9 +2503,7 @@ unsigned char* Emv_GetCoreData(unsigned int tagname, int *pvallen)
             }
             else
             {
-                #ifdef CFG_LIB_DEBUG
-                OsLog(LOG_DEBUG, " TAG %X not found in %s %d\r\n", tagname, __FUNCTION__,__LINE__);
-                #endif
+                TRACE( " TAG %X not found \r\n", tagname);
             }
         }
         else  if(s_emv_card_mode == NFC_DETECETED)
@@ -2520,16 +2518,13 @@ unsigned char* Emv_GetCoreData(unsigned int tagname, int *pvallen)
             }
             else
             {
-                #ifdef CFG_LIB_DEBUG
-                OsLog(LOG_DEBUG, " TAG %X not found in %s %d\r\n", tagname, __FUNCTION__,__LINE__);
-                #endif
+                TRACE( "TAG %X not found  \r\n", tagname);
             }
         }
     }
     *pvallen  = 0;
     return NULL;
 }
-#endif
 
 int Emv_SetCoreData(unsigned int tagname, unsigned char *pvalue, int valuelen)
 {
@@ -2579,9 +2574,7 @@ int Emv_FetchData(unsigned int* tagname, int count, unsigned char* obuf, int ole
                 }
                 else
                 {
-                    #ifdef CFG_LIB_DEBUG    
-                    OsLog(LOG_DEBUG, " TAG %X NOT found in %s\r\n", tagname[i], __FUNCTION__);
-                    #endif
+                    TRACE(" TAG %X NOT found in %s\r\n", tagname[i], __FUNCTION__);
                 }
             }
             else  if(s_emv_card_mode == NFC_DETECETED)
@@ -2595,9 +2588,7 @@ int Emv_FetchData(unsigned int* tagname, int count, unsigned char* obuf, int ole
                 }
                 else
                 {
-                    #ifdef CFG_LIB_DEBUG
-                    OsLog(LOG_DEBUG, " TAG %X not found in %s %d\r\n", tagname, __FUNCTION__,__LINE__);
-                    #endif
+                    TRACE( " TAG %X not found in %s %d\r\n", tagname, __FUNCTION__,__LINE__);
                 }
             }
         }         
@@ -2607,9 +2598,6 @@ int Emv_FetchData(unsigned int* tagname, int count, unsigned char* obuf, int ole
 
     if(uvDe55.len > olen)
     {
-        #ifdef CFG_LIB_DEBUG
-        OsLog(LOG_DEBUG,"-------->out of memory<--------");
-        #endif
         free(pTlvDe55);
         pTlvDe55 =NULL;
         return 0;
